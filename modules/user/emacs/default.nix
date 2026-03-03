@@ -31,6 +31,7 @@ in
                     vterm
                     envrc
                     evil-mc
+                    pdf-tools
 
                     diredfl
                     xterm-color

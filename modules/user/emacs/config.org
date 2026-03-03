@@ -669,3 +669,10 @@ Also set TERM accordingly (xterm-256color) in the shell itself
     (kbd "C-S-p") 'evil-mc-skip-and-goto-prev-match
     (kbd "C-S-n") 'evil-mc-skip-and-goto-next-match)
 #+end_src
+
+* PDFs
+#+begin_src emacs-lisp
+  (require 'pdf-tools)
+  (pdf-tools-install)
+  (add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1)))
+#+end_src
