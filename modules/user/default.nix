@@ -30,6 +30,7 @@
         # Languages
         lua
         go
+        typst
         rustc
         cargo
         rust-analyzer

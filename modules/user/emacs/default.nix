@@ -48,6 +48,7 @@ in
                     lua-mode
                     markdown-mode
                     markdown-ts-mode
+                    typst-ts-mode
                     qml-mode
                     (treesit-grammars.with-grammars (
                         grammars: with grammars; [
@@ -56,6 +57,7 @@ in
                             tree-sitter-just
                             tree-sitter-lua
                             tree-sitter-markdown
+                            tree-sitter-typst
                         ]
                     ))
                 ];
