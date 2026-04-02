@@ -6,9 +6,7 @@
 
             border_size = 0;
             resize_on_border = true;
-
             allow_tearing = false;
-            layout = "dwindle";
         };
         decoration = {
             rounding = 0;
@@ -38,9 +36,7 @@
 
             border_size = 1;
             resize_on_border = true;
-
             allow_tearing = false;
-            layout = "dwindle";
 
             "col.active_border" = "0xff454545";
         };

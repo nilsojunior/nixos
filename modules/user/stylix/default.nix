@@ -49,6 +49,7 @@ in
             base16Scheme = theme;
             targets = {
                 hyprland.enable = false;
+                hyprlock.enable = false;
                 vicinae.enable = false;
                 kitty.fonts.enable = false;
                 firefox = {

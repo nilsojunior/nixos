@@ -36,11 +36,8 @@ in
         wayland.windowManager.hyprland.enable = true;
 
         home.packages = with pkgs; [
-            kitty
-
             hyprpicker
             hyprshot
-            hyprlock
 
             playerctl
             brightnessctl
@@ -98,6 +95,10 @@ in
                     }
                 ];
 
+                general = {
+                    layout = "master";
+                };
+
                 dwindle = {
                     pseudotile = true;
                     preserve_split = true;
@@ -105,7 +106,7 @@ in
                 };
 
                 master = {
-                    new_status = "master";
+                    new_status = "slave";
                 };
 
                 misc = {
@@ -221,28 +222,28 @@ in
             HYPRSHOT_DIR = "Pictures/screenshots";
         };
 
-        home.file.".config/hypr/hyprlock.conf".text = ''
-general {
-    hide_cursor = true
-}
+        programs.hyprlock.enable = true;
+        programs.hyprlock.settings = {
+            general = {
+                hide_cursor = true;
+            };
 
-background {
-    path = screenshot
-    blur_passes = 3
-}
+            background = {
+                path = "screenshot";
+                blur_passes = 3;
+            };
 
-input-field {
-    size = 20%, 5%
-    outline_thickness = 1
-    rounding = 15
-    inner_color = 0xff${config.lib.stylix.colors.base00}
-    outer_color = 0xff454545
-    font_color = 0xff${config.lib.stylix.colors.base05}
-    placeholder_text =
-    fade_timeout = 0
-}
-
-        '';
+            input-field = {
+                size = "20%, 5%";
+                outline_thickness = 1;
+                rounding = 15;
+                inner_color = "0xff${config.lib.stylix.colors.base00}";
+                outer_color = "0xff454545";
+                font_color = "0xff${config.lib.stylix.colors.base05}";
+                placeholder_text = "";
+                fade_timeout = 0;
+            };
+        };
 
         home.file."${shader_path}".text = ''
 /*
