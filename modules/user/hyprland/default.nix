@@ -59,7 +59,7 @@ in
                     "[workspace 1 silent] ${browser}"
                     "[workspace 3 silent] ${ if editor != "emacs" then terminal else editor }"
                 ]
-                ++ lib.optional spotify.enable "spotify";
+                ++ lib.optional spotify.enable "[workspace 4 silent] spotify";
 
                 input = {
                     force_no_accel = true;
@@ -96,11 +96,7 @@ in
                         move = "20 monitor_h-120";
                         float = "yes";
                     }
-                ] ++ lib.optional spotify.enable {
-                    name = "spotify";
-                    "match:class" = "Spotify";
-                    workspace = "4 silent";
-                };
+                ];
 
                 dwindle = {
                     pseudotile = true;
