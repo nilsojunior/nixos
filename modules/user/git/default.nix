@@ -21,6 +21,9 @@ in
             signing.key = "~/.ssh/id_ed25519.pub";
             ignores = [
                 "target/" # Rust
+                ".direnv/"
+                "TAGS"
+                "build/"
             ];
         };
 
