@@ -678,3 +678,10 @@ Also set TERM accordingly (xterm-256color) in the shell itself
   (pdf-tools-install)
   (add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1)))
 #+end_src
+
+* Modes
+#+begin_src emacs-lisp
+  (add-hook 'c-mode-hook
+            (lambda () (setq-local comment-start "// "
+                             comment-end "")))
+#+end_src
