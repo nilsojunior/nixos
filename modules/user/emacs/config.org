@@ -226,7 +226,7 @@ Add the accent colour for symbols. In some modes I don't want `-` to be added.
       (font-lock-add-keywords
        nil
        (append nj/colours-base
-               (unless (derived-mode-p 'emacs-lisp-mode)
+               (unless (derived-mode-p 'emacs-lisp-mode 'nix-mode)
                  nj/colours-optional))
        'append)))
 
