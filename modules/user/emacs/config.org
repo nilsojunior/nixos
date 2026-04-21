@@ -210,21 +210,28 @@ Disable line wrapping
   ;; mode-line-inactive
 #+end_src
 
-Add the accent colour for symbols
+Add the accent colour for symbols. In some modes I don't want `-` to be added.
 #+begin_src emacs-lisp
+  (defconst nj/colours-base
+    '(("->" . nj/accent)
+      ("<-" . nj/accent)
+      ("=>" . nj/accent)
+      ("[]{}()!@#$%^&*+=|\\~`?/;:,.<>'\"\[]" . nj/accent)))
+
+  (defconst nj/colours-optional
+    '(("-" . nj/accent)))
+
   (defun nj/colours ()
     (unless (derived-mode-p 'help-mode 'special-mode)
-      (font-lock-add-keywords nil
-                              '(("->" . nj/accent)
-                                ("<-" . nj/accent)
-                                ("=>" . nj/accent)
-                                ("[]{}()!@#$%^&*+=|\\~`?/;:,.<>'\"\[]" . nj/accent))
-                              'append)
-      (when (derived-mode-p 'org-mode)
-        (font-lock-flush))))
+      (font-lock-add-keywords
+       nil
+       (append nj/colours-base
+               (unless (derived-mode-p 'emacs-lisp-mode)
+                 nj/colours-optional))
+       'append)))
 
   (add-hook 'after-change-major-mode-hook 'nj/colours)
-#+end_src
+                                              #+end_src
 
 Make the default font bold
 #+begin_src emacs-lisp
