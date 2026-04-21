@@ -685,3 +685,56 @@ Also set TERM accordingly (xterm-256color) in the shell itself
             (lambda () (setq-local comment-start "// "
                              comment-end "")))
 #+end_src
+
+* Nix
+#+begin_src emacs-lisp
+  (defun nj/project-init ()
+    "Create a git repository with direnv and nix setup"
+    (interactive)
+    ;; Build packages list from input
+    (let* ((dir   (read-directory-name "Create repository in: "))
+           (default-directory (file-name-as-directory dir))
+           (env-file ".envrc")
+           (flake-file "flake.nix")
+           (input (read-string "Packages: "))
+           (pkgs  (split-string input "[[:space:]]+" t))
+           (pkgs-list
+            (concat
+             "                      "
+             (mapconcat #'identity pkgs "\n                      ")
+             "\n")))
+
+      (make-directory default-directory t)
+
+      (with-temp-file env-file
+        (insert "use flake"))
+      (envrc-allow)
+
+      (with-temp-file flake-file
+        (insert
+         "{\n"
+         "    description = \"A very basic flake\";\n"
+         "\n"
+         "    inputs = {\n"
+         "        nixpkgs.url = \"nixpkgs/nixos-unstable\";\n"
+         "    };\n"
+         "\n"
+         "    outputs =\n"
+         "        { self, nixpkgs }:\n"
+         "        let\n"
+         "            system = \"x86_64-linux\";\n"
+         "            pkgs = import nixpkgs { inherit system; };\n"
+         "        in\n"
+         "          {\n"
+         "              devShells.${system}.default = pkgs.mkShell {\n"
+         "                  buildInputs = with pkgs; [\n"
+         "                      # Add packages here\n"
+         pkgs-list
+         "                  ];\n"
+         "              };\n"
+         "          };\n"
+         "}"))
+      (envrc-reload)
+      (call-process "git" nil nil nil "init")
+      (call-process "git" nil nil nil "add" env-file flake-file "flake.lock")))
+         #+end_src
