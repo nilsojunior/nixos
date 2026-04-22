@@ -60,7 +60,6 @@ Disable startup message
 #+end_src
 
 *** Keybindings
-
 These remaps make the cursor stay centered in the screen while navigating
 #+begin_src emacs-lisp
   (defun nj/scroll-down ()
