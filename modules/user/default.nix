@@ -27,26 +27,16 @@
     };
 
     home.packages = with pkgs; [
-        # Languages
-        lua
-        go
-        typst
-        rustc
-        cargo
-        rust-analyzer
-        lua-language-server
+        # Applications
+        neovim
+        pavucontrol
 
-        stylua
-
-        # Nix
-        nixfmt
-        nil
-        nixd
-
+        # Tools
+        unzip
+        ffmpeg
         dysk
         ripgrep
         eza
-        valgrind
         fd
         bat
         fzf

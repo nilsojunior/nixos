@@ -57,7 +57,6 @@
     # Don't wait for internet connection to start
     systemd.services.NetworkManager-wait-online.wantedBy = lib.mkForce [ ];
 
-
     nix.settings.experimental-features = [
         "nix-command"
         "flakes"
@@ -65,11 +64,9 @@
 
     environment.systemPackages = with pkgs; [
         wget
-        neovim
-        pavucontrol
-        gcc15
         just
         sshfs
+        man-pages
     ];
 
     # https://github.com/thiagokokada/nix-configs/blob/a00e8aa50e6e5786e1d533389c100aca41800417/modules/nixos/desktop/locale.nix#L12-L14
