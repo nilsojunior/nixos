@@ -118,7 +118,7 @@ These remaps make the cursor stay centered in the screen while navigating
     (kbd "C-k") 'previous-error
     (kbd "C-j") 'next-error)
 
-  (evil-define-key 'insert global-map (kbd "C-c") 'evil-normal-state)
+  (evil-define-key '(insert visual) global-map (kbd "C-c") 'evil-normal-state)
 #+end_src
 
 Stay in visual mode while indenting
