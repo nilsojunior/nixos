@@ -139,6 +139,24 @@ Stay in visual mode while indenting
   (define-key evil-visual-state-map (kbd "<") 'nj/indent-left)
 #+end_src
 
+Avoid minibuffer prompt
+#+begin_src emacs-lisp
+  (defun nj/find-file-at-point ()
+    (interactive)
+    (let ((file (thing-at-point 'filename t)))
+      (if (file-exists-p file)
+          (find-file (expand-file-name file))
+        (message "`%s` not found" file))))
+
+  (defun nj/xref-find-references-at-point ()
+    (interactive)
+    (let ((symbol (thing-at-point 'symbol t)))
+      (xref-find-references symbol)))
+
+  (evil-define-key 'normal global-map (kbd "gf") 'nj/find-file-at-point)
+  (evil-define-key 'normal global-map (kbd "gr") 'nj/xref-find-references-at-point)
+#+end_src
+
 ** Yank
 Highlight text when yanking
 #+begin_src emacs-lisp
