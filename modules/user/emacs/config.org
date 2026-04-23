@@ -248,7 +248,7 @@ Add the accent colour for symbols. In some modes I don't want `-` to be added.
        'append)))
 
   (add-hook 'after-change-major-mode-hook 'nj/colours)
-                                              #+end_src
+#+end_src
 
 Make the default font bold
 #+begin_src emacs-lisp
@@ -707,7 +707,7 @@ Also set TERM accordingly (xterm-256color) in the shell itself
 #+begin_src emacs-lisp
   (add-hook 'c-mode-hook
             (lambda () (setq-local comment-start "// "
-                             comment-end "")))
+                                   comment-end "")))
 #+end_src
 
 * Nix
@@ -761,4 +761,4 @@ Also set TERM accordingly (xterm-256color) in the shell itself
         (call-process "git" nil nil nil "init"))
       (call-process "git" nil nil nil "add" env-file flake-file "flake.lock")
       (envrc-reload)))
-         #+end_src
+#+end_src
