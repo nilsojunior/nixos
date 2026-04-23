@@ -752,13 +752,13 @@ Also set TERM accordingly (xterm-256color) in the shell itself
          "          {\n"
          "              devShells.${system}.default = pkgs.mkShell {\n"
          "                  buildInputs = with pkgs; [\n"
-         "                      # Add packages here\n"
          pkgs-list
          "                  ];\n"
          "              };\n"
          "          };\n"
          "}"))
-      (envrc-reload)
-      (call-process "git" nil nil nil "init")
-      (call-process "git" nil nil nil "add" env-file flake-file "flake.lock")))
+      (unless (project-current)
+        (call-process "git" nil nil nil "init"))
+      (call-process "git" nil nil nil "add" env-file flake-file "flake.lock")
+      (envrc-reload)))
          #+end_src
