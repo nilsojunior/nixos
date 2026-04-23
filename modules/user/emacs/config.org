@@ -757,8 +757,8 @@ Also set TERM accordingly (xterm-256color) in the shell itself
          "              };\n"
          "          };\n"
          "}"))
+      (envrc-reload)
       (unless (project-current)
         (call-process "git" nil nil nil "init"))
-      (call-process "git" nil nil nil "add" env-file flake-file "flake.lock")
-      (envrc-reload)))
+      (call-process "git" nil nil nil "add" env-file flake-file "flake.lock")))
 #+end_src
