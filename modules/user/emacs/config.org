@@ -92,6 +92,25 @@ These remaps make the cursor stay centered in the screen while navigating
     (call-interactively 'evil-next-line)
     (evil-scroll-line-to-center nil))
 
+  (evil-define-key 'normal global-map
+    (kbd "C-u") 'nj/scroll-up
+    (kbd "C-d") 'nj/scroll-down
+    (kbd "k") 'nj/up
+    (kbd "j") 'nj/down
+    (kbd "n") 'nj/search-next
+    (kbd "N") 'nj/search-previous)
+      #+end_src
+
+Compilation and universal argument
+#+begin_src emacs-lisp
+  (evil-define-key 'normal global-map
+    (kbd "C-|") 'universal-argument
+    (kbd "C-k") 'previous-error
+    (kbd "C-j") 'next-error)
+#+end_src
+
+Add blank lines
+#+begin_src emacs-lisp
   (defun nj/insert-blank-line-above (n)
     (interactive "p")
     (save-excursion
@@ -106,19 +125,20 @@ These remaps make the cursor stay centered in the screen while navigating
       (open-line n)))
 
   (evil-define-key 'normal global-map
-    (kbd "C-u") 'nj/scroll-up
-    (kbd "C-d") 'nj/scroll-down
-    (kbd "k") 'nj/up
-    (kbd "j") 'nj/down
-    (kbd "n") 'nj/search-next
-    (kbd "N") 'nj/search-previous
-    (kbd "C-p") 'universal-argument
     (kbd "C-a") 'nj/insert-blank-line-below
-    (kbd "C-S-a") 'nj/insert-blank-line-above
-    (kbd "C-k") 'previous-error
-    (kbd "C-j") 'next-error)
+    (kbd "C-S-a") 'nj/insert-blank-line-above)
+#+end_src
 
+Make `C-c` behave live `ESC`
+#+begin_src emacs-lisp
   (evil-define-key '(insert visual) global-map (kbd "C-c") 'evil-normal-state)
+#+end_src
+
+Buffer navigation
+#+begin_src emacs-lisp
+  (evil-define-key '(insert visual normal) global-map
+    (kbd "M-i") 'next-buffer
+    (kbd "M-o") 'previous-buffer)
 #+end_src
 
 Stay in visual mode while indenting
@@ -155,6 +175,17 @@ Avoid minibuffer prompt
 
   (evil-define-key 'normal global-map (kbd "gf") 'nj/find-file-at-point)
   (evil-define-key 'normal global-map (kbd "gr") 'nj/xref-find-references-at-point)
+#+end_src
+
+Align equal sign
+#+begin_src emacs-lisp
+  (evil-define-operator nj/align-equals (beg end)
+    (interactive "<r>")
+    (evil-indent beg end)
+    (align-regexp beg end "\\(\\s-*\\)=" 1 1 t))
+
+  (evil-define-key '(normal visual) global-map
+    "ga" 'nj/align-equals)
 #+end_src
 
 ** Yank
