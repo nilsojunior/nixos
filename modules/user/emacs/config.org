@@ -712,6 +712,7 @@ Also set TERM accordingly (xterm-256color) in the shell itself
 
   (nj/leader-keys
     "ma" '(evil-mc-make-all-cursors :wk "Make All Cursors")
+    "mu" '(evil-mc-undo-last-added-cursor :wk "Undo Last Cursor")
     "mc" '(evil-mc-make-cursor-here :wk "Make Cursor At Point")
     "mp" '(evil-mc-pause-cursors :wk "Pause Cursors")
     "mr" '(evil-mc-resume-cursors :wk "Resume Cursors"))
