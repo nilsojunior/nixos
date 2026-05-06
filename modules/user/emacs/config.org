@@ -308,7 +308,6 @@ Make the default font bold
 #+end_src
 
 * Keybindings
-Maybe I want buffer navigation keybinds?
 #+begin_src emacs-lisp
   (require 'general)
   (general-evil-setup)
