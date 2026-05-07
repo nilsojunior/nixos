@@ -36,6 +36,8 @@ in
             init.defaultBranch = "main";
             commit.gpgSign = true;
             push.autoSetupRemote = true;
+            pull.rebase = true;
+            rebase.autoStash = true;
             url = {
                 "git@github.com:nilsojunior/" = {
                     insteadOf = "nj:";
