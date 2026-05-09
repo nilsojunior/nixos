@@ -32,6 +32,7 @@
         pavucontrol
 
         # Tools
+        typst
         unzip
         ffmpeg
         dysk
