@@ -64,6 +64,7 @@ in
                         ]
                     ))
                 ];
+
             extraConfig = ''
                     (org-babel-load-file
                         (expand-file-name
@@ -72,6 +73,6 @@ in
                 '';
         };
 
-        # home.file.".emacs.d/config.org".source = ./config.org;
+        home.file.".emacs.d/config.org".source = ./config.org;
     };
 }
