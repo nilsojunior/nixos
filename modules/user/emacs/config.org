@@ -177,15 +177,26 @@ Avoid minibuffer prompt
   (evil-define-key 'normal global-map (kbd "gr") 'nj/xref-find-references-at-point)
 #+end_src
 
-Align equal sign
+Align
 #+begin_src emacs-lisp
   (evil-define-operator nj/align-equals (beg end)
+    "Indent and align equal sign, this aligns every continous text that has `=`, maybe this should only
+    work for the operators like `+` or `*` but I'm not sure."
     (interactive "<r>")
     (evil-indent beg end)
-    (align-regexp beg end "\\(\\s-*\\)=" 1 1 t))
+    (align-regexp beg end "\\(\\s-*\\)\\S-*=" 1 1 t))
+
+  (evil-define-operator nj/align-char (beg end char)
+    "Indent and align a single character."
+    (interactive "<r>")
+    (evil-indent beg end)
+    (align-regexp beg end
+                  (format "\\(\\s-*\\)%s" (regexp-quote (char-to-string (read-char-exclusive char))))
+                  1 1 t))
 
   (evil-define-key '(normal visual) global-map
-    "ga" 'nj/align-equals)
+    "ga" 'nj/align-equals
+    "gs" 'nj/align-char)
 #+end_src
 
 ** Yank
@@ -402,9 +413,9 @@ Make ellipsis use the same color as the header
         `((".*" ,(expand-file-name "auto-save/" user-emacs-directory) t))
         lock-file-name-transforms
         `((".*" ,(expand-file-name "lock/" user-emacs-directory) t))
-        use-short-answers t)
-
-  (setq compilation-scroll-output t)
+        use-short-answers t
+        compilation-scroll-output t
+        vc-follow-symlinks t)
 
   (defun nj/format-buffer ()
     (when-let* ((project (project-current))
