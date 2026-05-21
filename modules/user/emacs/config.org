@@ -125,8 +125,8 @@ Add blank lines
       (open-line n)))
 
   (evil-define-key 'normal global-map
-    (kbd "C-a") 'nj/insert-blank-line-below
-    (kbd "C-S-a") 'nj/insert-blank-line-above)
+    (kbd "C-S-a") 'nj/insert-blank-line-above
+    (kbd "C-a") 'nj/insert-blank-line-below)
 #+end_src
 
 Make `C-c` behave live `ESC`
@@ -205,7 +205,7 @@ Highlight text when yanking
   (defun highlight-on-yank (orig-fn beg end &rest args)
     (apply orig-fn beg end args)
     (let ((ov (make-overlay beg end)))
-      (overlay-put ov 'face 'show-paren-mismatch)
+      (overlay-put ov 'face 'isearch)
       (run-with-timer 0.040 nil 'delete-overlay ov)))
 
   (advice-add 'evil-yank :around #'highlight-on-yank)
@@ -219,6 +219,7 @@ Highlight text when yanking
   (setq display-line-numbers-type 'relative)
   (global-display-line-numbers-mode 1)
   (setq-default truncate-lines t)
+  (setq truncate-lines t)
 #+end_src
 
 Disable line wrapping
@@ -228,43 +229,45 @@ Disable line wrapping
 
 ** Face Attributes
 #+begin_src emacs-lisp
-  (defvar nj/accent 'minibuffer-prompt)
+  ;; (defvar nj/accent 'minibuffer-prompt)
 
-  (set-face-attribute 'mode-line nil
-                      :inherit 'mode-line
-                      :foreground 'unspecified)
+  ;; (set-face-attribute 'mode-line nil
+  ;;                     :inherit 'mode-line
+  ;;                     :foreground 'unspecified)
+
   ;; :background "#131520")
 
-  (set-face-attribute 'mode-line-inactive nil
-                      :inherit 'mode-line
-                      :background 'unspecified)
+  ;; (set-face-attribute 'mode-line-inactive nil
+  ;;                     :inherit 'mode-line
+  ;;                     :background 'unspecified)
 
-  (set-face-attribute 'line-number-current-line nil
-                      :inherit nj/accent
-                      :background 'unspecified)
+  ;; (set-face-attribute 'line-number-current-line nil
+  ;;                     :inherit 'nj/accent
+  ;;                     :background 'unspecified)
 
-  (set-cursor-color (face-foreground nj/accent))
+  ;; (set-cursor-color (face-foreground nj/accent))
 
-  (set-face-attribute 'font-lock-variable-name-face nil
-                      :foreground nil)
+  ;; (set-face-attribute 'font-lock-variable-name-face nil
+  ;;                     :foreground nil)
 
-  (set-face-attribute 'font-lock-function-name-face nil
-                      :foreground (face-attribute 'font-lock-warning-face :foreground))
+  ;; (set-face-attribute 'font-lock-function-name-face nil
+  ;;                     :foreground (face-attribute 'font-lock-warning-face :foreground))
 
-  (set-face-attribute 'show-paren-match nil
-                      :background (face-foreground 'error nil 'default)
-                      :foreground (face-foreground 'default))
+  ;; (set-face-attribute 'show-paren-match nil
+  ;;                     :background (face-foreground 'error nil 'default)
+  ;;                     :foreground (face-foreground 'default))
 
-  (defun nj/inherit-background (faces)
-    (dolist (face faces)
-      (set-face-attribute face nil
-                          :inherit 'default
-                          :background 'unspecified)))
+  ;; (defun nj/inherit-background (faces)
+  ;;   (dolist (face faces)
+  ;;     (set-face-attribute face nil
+  ;;                         :inherit 'default
+  ;;                         :background 'unspecified)))
 
-  (nj/inherit-background
-   '(fringe
-     ;; tooltip
-     line-number))
+  ;; (nj/inherit-background
+  ;;  '(fringe
+  ;;    line-number))
+
+  ;; tooltip
   ;; line-number-current-line
   ;; mode-line-inactive
 #+end_src
@@ -289,12 +292,77 @@ Add the accent colour for symbols. In some modes I don't want `-` to be added.
                  nj/colours-optional))
        'append)))
 
-  (add-hook 'after-change-major-mode-hook 'nj/colours)
-#+end_src
+  (defface nj/face-todo
+    '((t :foreground "Red" :weight bold :underline t))
+    "Faco for TODO.")
+
+  (defface nj/face-note
+    '((t :foreground "Dark Green" :weight bold :underline t))
+    "Face for NOTE.")
+
+  (defun nj/comments ()
+    (font-lock-add-keywords
+     nil
+     '(("\\<TODO\\>" 0 'nj/face-todo t)
+       ("\\<NOTE\\>" 0 'nj/face-note t))))
+
+  ;; (add-hook 'after-change-major-mode-hook 'nj/colours)
+  (add-hook 'prog-mode-hook 'nj/comments)
+    #+end_src
 
 Make the default font bold
 #+begin_src emacs-lisp
-  (set-face-attribute 'default nil :weight 'bold)
+  ;; (set-face-attribute 'default nil :weight 'bold)
+#+end_src
+
+** Theme
+#+begin_src emacs-lisp
+  (add-to-list 'default-frame-alist '(font . "Liberation Mono Bold"))
+  (set-face-attribute 'default t :font "Liberation Mono Bold")
+  (let ((Orange    "#DAB98F")
+        (Comment   "gray50")
+        (Olive     "olive")
+        (Gold      "DarkGoldenrod3")
+        (OliveDrab "olive drab")
+        (Blue      "midnight blue")
+        (Highlight "blue3")
+        (Fg        "burlywood3")
+        ;; (Bg        "#161616")
+        (Bg        "#090909")
+        (Cursor    "#40FF40"))
+
+    (set-face-attribute 'font-lock-builtin-face       nil :foreground Orange)
+    (set-face-attribute 'font-lock-comment-face       nil :foreground Comment)
+    (set-face-attribute 'font-lock-doc-face           nil :foreground Comment)
+    (set-face-attribute 'line-number                  nil :foreground Comment)
+    (set-face-attribute 'font-lock-constant-face      nil :foreground OliveDrab)
+    (set-face-attribute 'font-lock-string-face        nil :foreground OliveDrab)
+    (set-face-attribute 'font-lock-keyword-face       nil :foreground Gold)
+    (set-face-attribute 'font-lock-function-name-face nil :foreground Fg)
+    (set-face-attribute 'font-lock-type-face          nil :foreground Fg)
+    (set-face-attribute 'font-lock-variable-name-face nil :foreground Fg)
+
+    (set-face-attribute 'org-block nil :foreground Fg)
+
+    (global-hl-line-mode t)
+    (set-face-background 'hl-line Blue)
+    (set-face-attribute 'line-number-current-line     nil :foreground Comment)
+
+    (set-face-attribute 'mode-line nil
+                        :foreground Comment
+                        :background Bg
+                        :weight 'bold
+                        :box nil)
+
+    (copy-face 'mode-line 'mode-line-inactive)
+
+    (set-face-attribute 'vertical-border nil :foreground Bg)
+
+    (set-face-background 'highlight Highlight)
+
+    (set-foreground-color Fg)
+    (set-background-color Bg)
+    (set-cursor-color Cursor))
 #+end_src
 
 ** Mode Line
@@ -346,26 +414,90 @@ Make the default font bold
             (message "ERROR: The repository: %s is not hosted on GitHub." url)))
       (message "ERROR: Not a git repository.")))
 
+  (defun nj/markdown-insert-link-from-clipboard ()
+    "Insert a markdown link with the contents of the system clipboard."
+    (interactive)
+    (let* ((title (read-string "Title: "))
+           (clip  (string-trim (evil-get-register ?+))))
+      (insert (format "[%s](%s)" title clip))))
+
+  (defmacro nj/project-or-default-directory (&rest Body)
+    `(let ((default-directory
+            (or (when-let ((P (project-current)))
+                  (project-root P))
+                default-directory)))
+       ,@Body))
+
+  (defvar nj/CompileCommand nil)
+
+  (defun nj/compile ()
+    (interactive)
+    (setq nj/CompileCommand (read-shell-command "Compile command: " nil 'compile-history))
+    (nj/project-or-default-directory
+     (compile nj/CompileCommand)))
+
+  (defun nj/recompile ()
+    (interactive)
+    (if nj/CompileCommand
+        (nj/project-or-default-directory
+         (compile nj/CompileCommand))
+      (nj/compile)))
+
+  (defun nj/shell-command ()
+    "Run a shell command, if input is empty run the last command in history."
+    (interactive)
+    (nj/project-or-default-directory
+     (let ((Cmd (read-shell-command "Shell command: " nil 'shell-command-history)))
+       (when (string-empty-p Cmd)
+         (setq Cmd (car shell-command-history)))
+       (shell-command Cmd))))
+
+  (defun nj/async-shell-command ()
+    "Run a async shell command, if input is empty run the last command in history."
+    (interactive)
+    (nj/project-or-default-directory
+     (let ((Cmd (read-shell-command "Async shell command: " nil 'shell-command-history)))
+       (when (string-empty-p Cmd)
+         (setq Cmd (car shell-command-history)))
+       (async-shell-command Cmd))))
+
+  (defun nj/find-file ()
+    (interactive)
+    (if (project-current)
+        (project-find-file)
+      (call-interactively 'find-file)))
+
+  (defun nj/force-kill-current-buffer ()
+    (interactive)
+    (let ((Buf (current-buffer)))
+    (when-let ((Proc (get-buffer-process Buf)))
+      (delete-process Proc))
+    (kill-buffer Buf)))
+
   (nj/leader-keys
-    "y" '((lambda () (interactive) (evil-use-register ?+) (call-interactively 'evil-yank)) :wk "Yank to system clipboard")
-    "Y" '((lambda () (interactive) (evil-use-register ?+) (call-interactively 'evil-yank-line)) :wk "Yank to system clipboard")
-    "d" '(:ignore t :wk "Project")
-    "df" '(project-find-file :wk "Find File")
-    "dp" '(nj/project-switch-find-file :wk "Switch Projects")
-    "dk" '(project-compile :wk "Compile")
-    "dj" '(project-recompile :wk "Recompile")
-    "db" '(project-switch-to-buffer :wk "Switch Buffers")
-    "ds" '(project-shell-command :wk "Shell Command")
-    "da" '(project-async-shell-command :wk "Async Shell Command")
-    "f"  '(:ignore t :wk "Find")
-    "fj" '(switch-to-buffer :wk "Switch Buffers")
-    "fk" '(recentf :wk "Recent File")
-    "fi" '(imenu :wk "Imenu")
-    "sd" '(shell-command :wk "Shell Command")
-    "sa" '(async-shell-command :wk "Async Shell Command")
-    "cj" '(recompile :wk "Recompile")
-    "ck" '(compile :wk "Compile")
-    "gh" '(nj/open-remote :wk "Open remote repo in browser"))
+    "y"   '((lambda () (interactive) (evil-use-register ?+) (call-interactively 'evil-yank)) :wk "Yank to system clipboard")
+    "Y"   '((lambda () (interactive) (evil-use-register ?+) (call-interactively 'evil-yank-line)) :wk "Yank to system clipboard")
+    "C-f" '(nj/find-file :wk "Find File")
+    "C-c" '(nj/compile :wk "Compile")
+    "C-r" '(nj/recompile :wk "Recompile")
+    "C-s" '(nj/shell-command :wk "Shell Command")
+    "C-a" '(nj/async-shell-command :wk "Async Shell Command")
+    "C-k" '(nj/force-kill-current-buffer :wk "Force kill the current buffer")
+    "d"   '(:ignore t :wk "Project")
+    "dp"  '(nj/project-switch-find-file :wk "Switch Projects")
+    "db"  '(project-switch-to-buffer :wk "Switch Buffers")
+    "f"   '(:ignore t :wk "Find")
+    "fk"  '(recentf :wk "Recent File")
+    "fi"  '(imenu :wk "Imenu")
+    "sd"  '(shell-command :wk "Shell Command")
+    "sa"  '(async-shell-command :wk "Async Shell Command")
+    "cj"  '(recompile :wk "Recompile")
+    "ck"  '(compile :wk "Compile")
+    "gh"  '(nj/open-remote :wk "Open remote repo in browser"))
+
+  (nj/leader-keys
+    :keymaps 'markdown-mode-map
+    "C-l" '(nj/markdown-insert-link-from-clipboard :wk "Insert link from clipboard"))
 
   (defun nj/paste-from-system ()
     (interactive)
@@ -415,7 +547,9 @@ Make ellipsis use the same color as the header
         `((".*" ,(expand-file-name "lock/" user-emacs-directory) t))
         use-short-answers t
         compilation-scroll-output t
-        vc-follow-symlinks t)
+        vc-follow-symlinks t
+        imenu-flatten t
+        org-imenu-depth 4)
 
   (defun nj/format-buffer ()
     (when-let* ((project (project-current))
@@ -427,7 +561,8 @@ Make ellipsis use the same color as the header
           (indent-region (point-min) (point-max)))))
     (delete-trailing-whitespace))
 
-  (add-hook 'before-save-hook 'nj/format-buffer)
+  ;; (add-hook 'before-save-hook 'nj/format-buffer)
+  (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
   (global-auto-revert-mode)
   (setq global-auto-revert-non-file-buffers t)
@@ -438,11 +573,26 @@ Make ellipsis use the same color as the header
   (set-display-table-slot standard-display-table 0 ?\ )
 
   (etags-regen-mode)
+
+  (setq display-buffer-alist
+        `(
+          ("\\*Woman*"
+           (display-buffer-reuse-mode-window
+            display-buffer-below-selected))
+          ))
+
+  (advice-add 'woman :around
+              (lambda (orig &rest args)
+                (save-selected-window
+                  (apply orig args))))
 #+end_src
 
-Last compile command will be the default
+Include `_` as a word character like in vim
 #+begin_src emacs-lisp
-  (setq-default compile-command '(car compile-history))
+  (add-hook 'after-change-major-mode-hook
+            (lambda ()
+              (modify-syntax-entry ?_ "w")))
+  (setq evil-echo-state nil)
 #+end_src
 
 * Dired
@@ -453,9 +603,9 @@ Last compile command will be the default
         dired-kill-when-opening-new-dired-buffer t
         dired-auto-revert-buffer t)
 
-  (require 'diredfl)
-  (diredfl-global-mode 1)
-  (set-face-attribute 'diredfl-date-time nil :weight 'unspecified :inherit 'default)
+  ;; (require 'diredfl)
+  ;; (diredfl-global-mode 1)
+  ;; (set-face-attribute 'diredfl-date-time nil :weight 'unspecified :inherit 'default)
 #+end_src
 
 * Completions
@@ -463,6 +613,7 @@ This will go to the next line or previous if fido-vertica-mode is enabled. Other
 #+begin_src emacs-lisp
   (savehist-mode 1)
   (recentf-mode 1)
+  (setq recentf-max-saved-items 100)
 
   (fido-vertical-mode)
   (evil-define-key 'insert icomplete-fido-mode-map
@@ -637,39 +788,39 @@ Maybe I should just use `rust-mode` with `rust-mode-treesitter-derive`?
 ** Comint
 Also set TERM accordingly (xterm-256color) in the shell itself
 #+begin_src emacs-lisp
-  (require 'xterm-color)
-  (add-hook 'shell-mode-hook
-            (lambda ()
-              ;; Disable font-locking in this buffer to improve performance
-              (font-lock-mode -1)
-              ;; Prevent font-locking from being re-enabled in this buffer
-              (make-local-variable 'font-lock-function)
-              (setq font-lock-function (lambda (_) nil))
-              ;; Replace ansi-color-process-output with xterm-color-filter
-              (make-local-variable 'comint-output-filter-functions)
-              (remove-hook 'comint-output-filter-functions 'ansi-color-process-output t)
-              (add-hook 'comint-preoutput-filter-functions 'xterm-color-filter nil t)))
+  ;; (require 'xterm-color)
+  ;; (add-hook 'shell-mode-hook
+  ;;           (lambda ()
+  ;;             ;; Disable font-locking in this buffer to improve performance
+  ;;             (font-lock-mode -1)
+  ;;             ;; Prevent font-locking from being re-enabled in this buffer
+  ;;             (make-local-variable 'font-lock-function)
+  ;;             (setq font-lock-function (lambda (_) nil))
+  ;;             ;; Replace ansi-color-process-output with xterm-color-filter
+  ;;             (make-local-variable 'comint-output-filter-functions)
+  ;;             (remove-hook 'comint-output-filter-functions 'ansi-color-process-output t)
+  ;;             (add-hook 'comint-preoutput-filter-functions 'xterm-color-filter nil t)))
 #+end_src
 
 ** Eshell
 #+begin_src emacs-lisp
-  (require 'eshell) ; or use with-eval-after-load
+  ;; (require 'eshell) ; or use with-eval-after-load
 
-  (add-hook 'eshell-before-prompt-hook
-            (lambda ()
-              (setq xterm-color-preserve-properties t)))
+  ;; (add-hook 'eshell-before-prompt-hook
+  ;;           (lambda ()
+  ;;             (setq xterm-color-preserve-properties t)))
 
-  (add-to-list 'eshell-preoutput-filter-functions 'xterm-color-filter)
-  (setq eshell-output-filter-functions (remove 'eshell-handle-ansi-color eshell-output-filter-functions))
-  (setenv "TERM" "xterm-256color")
+  ;; (add-to-list 'eshell-preoutput-filter-functions 'xterm-color-filter)
+  ;; (setq eshell-output-filter-functions (remove 'eshell-handle-ansi-color eshell-output-filter-functions))
+  ;; (setenv "TERM" "xterm-256color")
 #+end_src
 
 ** Compilation
 #+begin_src emacs-lisp
-  (setq compilation-environment '("TERM=xterm-256color"))
+  ;; (setq compilation-environment '("TERM=xterm-256color"))
 
-  (define-advice compilation-filter (:around (f proc string) xterm-color)
-    (funcall f proc (xterm-color-filter string)))
+  ;; (define-advice compilation-filter (:around (f proc string) xterm-color)
+  ;;   (funcall f proc (xterm-color-filter string)))
 #+end_src
 
 * Magit
@@ -745,6 +896,16 @@ Also set TERM accordingly (xterm-256color) in the shell itself
   (add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1)))
 #+end_src
 
+* Etags
+#+begin_src emacs-lisp
+  ;; (defun nj/etags-compile ()
+  ;;   (interactive)
+  ;;   (let ((default-directory (project-root (project-current))))
+  ;;     (call-process-shell-command
+  ;;      "find . -type f \\(-name '*.[ch]'\\) -print | etags -")))
+  ;; (etags-regen-mode)
+#+end_src
+
 * Modes
 #+begin_src emacs-lisp
   (add-hook 'c-mode-hook
@@ -803,4 +964,9 @@ Also set TERM accordingly (xterm-256color) in the shell itself
       (unless (project-current)
         (call-process "git" nil nil nil "init"))
       (call-process "git" nil nil nil "add" env-file flake-file "flake.lock")))
+         #+end_src
+
+* Test
+#+begin_src emacs-lisp
+  (require 'dap-mode)
 #+end_src

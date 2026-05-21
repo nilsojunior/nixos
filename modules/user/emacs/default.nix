@@ -13,7 +13,10 @@ in
     };
 
     config = lib.mkIf cfg.enable {
-        # stylix.targets.emacs.enable = false;
+        stylix.targets.emacs.enable = false;
+        home.packages = with pkgs; [
+            liberation_ttf
+        ];
         programs.emacs = {
             enable = true;
             package = pkgs.emacs-pgtk;
