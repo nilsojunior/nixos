@@ -55,6 +55,11 @@ Disable startup message
   (require 'evil-collection)
   (evil-collection-init)
 
+  (evil-declare-motion 'org-forward-paragraph)
+  (evil-declare-motion 'org-backward-paragraph)
+  (evil-declare-motion 'org-forward-sentence)
+  (evil-declare-motion 'org-backward-sentence)
+
   (require 'evil-commentary)
   (evil-commentary-mode 1)
 #+end_src
@@ -62,44 +67,80 @@ Disable startup message
 *** Keybindings
 These remaps make the cursor stay centered in the screen while navigating
 #+begin_src emacs-lisp
+  (define-key evil-inner-text-objects-map (kbd "j") 'evil-inner-curly)
+  (define-key evil-outer-text-objects-map (kbd "j") 'evil-a-curly)
+  (define-key evil-inner-text-objects-map (kbd "l") 'evil-inner-bracket)
+  (define-key evil-outer-text-objects-map (kbd "l") 'evil-a-bracket)
+
+  (evil-define-key '(normal visual motion) global-map
+    (kbd "H") 'evil-next-line-1-first-non-blank
+    (kbd "L") 'evil-end-of-line
+    (kbd "J") 'evil-forward-paragraph
+    (kbd "K") 'evil-backward-paragraph
+    (kbd "_") 'evil-join
+    (kbd "M") 'evil-lookup)
+
+  (evil-define-key '(normal visual motion) org-mode-map
+    (kbd "J") 'org-forward-paragraph
+    (kbd "K") 'org-backward-paragraph)
+
   (defun nj/scroll-down ()
     (interactive)
     (evil-scroll-down nil)
-    (evil-scroll-line-to-center nil))
+    (recenter))
 
   (defun nj/scroll-up ()
     (interactive)
     (evil-scroll-up nil)
-    (evil-scroll-line-to-center nil))
-
-  (defun nj/search-next ()
-    (interactive)
-    (evil-search-next)
-    (evil-scroll-line-to-center nil))
-
-  (defun nj/search-previous ()
-    (interactive)
-    (evil-search-previous)
-    (evil-scroll-line-to-center nil))
-
-  (defun nj/up ()
-    (interactive)
-    (call-interactively 'evil-previous-line)
-    (evil-scroll-line-to-center nil))
-
-  (defun nj/down ()
-    (interactive)
-    (call-interactively 'evil-next-line)
-    (evil-scroll-line-to-center nil))
+    (recenter))
 
   (evil-define-key 'normal global-map
-    (kbd "C-u") 'nj/scroll-up
     (kbd "C-d") 'nj/scroll-down
-    (kbd "k") 'nj/up
-    (kbd "j") 'nj/down
-    (kbd "n") 'nj/search-next
-    (kbd "N") 'nj/search-previous)
-      #+end_src
+    (kbd "C-u") 'nj/scroll-up)
+
+  (defun nj-recenter (&rest _)
+    (recenter))
+
+  (defun nj-recenter-list (&rest Fns)
+    (dolist (F Fns)
+      (advice-add F :after #'nj-recenter)))
+
+  (nj-recenter-list
+   'newline
+   'previous-error
+   'next-error
+   'evil-next-line
+   'evil-previous-line
+   'evil-forward-paragraph  'org-forward-paragraph
+   'evil-backward-paragraph 'org-backward-paragraph
+   ;; 'evil-scroll-up
+   ;; 'evil-scroll-down
+   'evil-scroll-page-up
+   'evil-scroll-page-down
+   'evil-open-below
+   'evil-open-above
+   'evil-change
+   'evil-delete
+   'evil-yank
+   'evil-paste-before
+   'evil-paste-after
+   'evil-undo
+   'evil-redo)
+
+  (load-file (expand-file-name "nj-search.el" user-emacs-directory))
+  (require 'nj-search-mode)
+  (nj-search-mode 1)
+
+  (evil-define-key '(normal visual) global-map
+    "/" 'nj-search-forward
+    "?" 'nj-search-backwards
+    "*" 'nj-search-word-forward
+    "#" 'nj-search-word-backwards
+    "n" 'nj-search-next
+    "N" 'nj-search-prev)
+
+  (advice-add 'evil-force-normal-state :before #'nj-search-clear-overlays)
+                    #+end_src
 
 Compilation and universal argument
 #+begin_src emacs-lisp
@@ -116,16 +157,19 @@ Add blank lines
     (save-excursion
       (beginning-of-line)
       (open-line n))
-    (when (bolp) (forward-char n)))
+    (when (bolp) (forward-char n))
+    (recenter))
 
   (defun nj/insert-blank-line-below (n)
     (interactive "p")
     (save-excursion
       (end-of-line)
-      (open-line n)))
+      (open-line n))
+    (recenter))
 
+  ;; TODO: Recenter
   (evil-define-key 'normal global-map
-    (kbd "C-S-a") 'nj/insert-blank-line-above
+    (kbd "C-A") 'nj/insert-blank-line-above
     (kbd "C-a") 'nj/insert-blank-line-below)
 #+end_src
 
@@ -136,9 +180,27 @@ Make `C-c` behave live `ESC`
 
 Buffer navigation
 #+begin_src emacs-lisp
+  (defconst nj-ignored-buffers
+    '("*envrc*"))
+
+  (defun nj-navigate-buffers (Fn)
+    (let ((Start (current-buffer)))
+      (funcall Fn)
+      (while (and (member (buffer-name) nj-ignored-buffers)
+                  (not (eq (current-buffer) Start)))
+        (funcall Fn))))
+
+  (defun nj-next-buffer ()
+    (interactive)
+    (nj-navigate-buffers #'next-buffer))
+
+  (defun nj-previous-buffer ()
+    (interactive)
+    (nj-navigate-buffers #'previous-buffer))
+
   (evil-define-key '(insert visual normal) global-map
-    (kbd "M-i") 'next-buffer
-    (kbd "M-o") 'previous-buffer)
+    (kbd "M-i") 'nj-next-buffer
+    (kbd "M-o") 'nj-previous-buffer)
 #+end_src
 
 Stay in visual mode while indenting
@@ -199,6 +261,12 @@ Align
     "gs" 'nj/align-char)
 #+end_src
 
+Save
+#+begin_src emacs-lisp
+  (evil-define-key 'normal global-map
+    (kbd "C-s") 'save-buffer)
+#+end_src
+
 ** Yank
 Highlight text when yanking
 #+begin_src emacs-lisp
@@ -247,7 +315,7 @@ Disable line wrapping
 
   ;; (set-cursor-color (face-foreground nj/accent))
 
-  ;; (set-face-attribute 'font-lock-variable-name-face nil
+  ;; (set-face-attribute 'font-lock-variable-name-face nil
   ;;                     :foreground nil)
 
   ;; (set-face-attribute 'font-lock-function-name-face nil
@@ -363,6 +431,12 @@ Make the default font bold
     (set-foreground-color Fg)
     (set-background-color Bg)
     (set-cursor-color Cursor))
+
+  ;; (set-face-attribute 'icomplete-selected-match nil
+  ;;                     :foreground 'unspecified
+  ;;                     :background 'unspecified
+  ;;                     :box '(:line-width 3 :color "#b36d47" :style flat-button))
+  ;; :box '(:line-width 2 :color "#b26a48"))
 #+end_src
 
 ** Mode Line
@@ -386,7 +460,67 @@ Make the default font bold
   				 )))
 #+end_src
 
-* Keybindings
+** Keybindings
+Imenu
+#+begin_src emacs-lisp
+  (defun nj/imenu--flatten (Index)
+    (let (Items)
+      (dolist (Entry Index Items)
+        (cond
+         ;; NOTE: Skip invalid entries
+         ((null (car-safe Entry)))
+         ((string= (car Entry) "*Rescan*"))
+         ((imenu--subalist-p Entry)
+          (setq Items (nconc Items (nj/imenu--flatten (cdr Entry)))))
+      (t
+       (push Entry Items))))))
+
+  (defun nj/imenu ()
+    (interactive)
+    (let* ((Project (project-current))
+           (Root    (if Project
+                        (project-root Project)
+                      default-directory))
+           (Files   (if Project
+                        (project-files Project)
+                      (directory-files-recursively Root ".")))
+           (Items ()))
+      (dolist (File Files)
+        (when (and (file-regular-p File)
+                   (not (backup-file-name-p File)))
+          (let ((Buf (find-file-noselect File t)))
+            (with-current-buffer Buf
+              (ignore-errors
+                (let ((Index (nj/imenu--flatten (imenu--make-index-alist t))))
+                  (dolist (Entry Index)
+                    (unless (string= (car Entry) "*Rescan*")
+                      (let* ((Func   (car Entry))
+                             (Marker (cdr Entry))
+                             (Line   (when (markerp Marker)
+                                       (save-excursion
+                                         (goto-char Marker)
+                                         (string-trim
+                                          (buffer-substring-no-properties
+                                           (line-beginning-position)
+                                           (line-end-position))))))
+                             (Label (if Line
+                                        (format "%s %s" Func
+                                                (propertize Line 'face '(:foreground "Red"))))))
+                        (push (cons Label Marker) Items))))))))))
+      (if (null Items)
+          (message "No imenu entries found.")
+        (let* ((Prompt (completing-read "Jump to: " Items nil t))
+               (Entry  (assoc Prompt Items)))
+          (when Entry
+            (let ((Marker (cdr Entry)))
+              (if (markerp Marker)
+                  (progn
+                    (switch-to-buffer (marker-buffer Marker))
+                    (goto-char Marker)) ;; NOTE: Recenter?
+                (imenu Entry))))))))
+       #+end_src
+
+Keybinds
 #+begin_src emacs-lisp
   (require 'general)
   (general-evil-setup)
@@ -470,34 +604,52 @@ Make the default font bold
   (defun nj/force-kill-current-buffer ()
     (interactive)
     (let ((Buf (current-buffer)))
-    (when-let ((Proc (get-buffer-process Buf)))
-      (delete-process Proc))
-    (kill-buffer Buf)))
+      (when-let ((Proc (get-buffer-process Buf)))
+        (delete-process Proc))
+      (kill-buffer Buf)))
+
+  (defun nj-find-corresponding-file ()
+    (interactive)
+    (if (member (file-name-extension buffer-file-name)
+                '("c" "cpp"))
+        (if-let ((File
+                  (save-excursion
+                    (goto-char (point-min))
+                    (when (re-search-forward
+                           "^#include [ \t]*\"\\([^\"]+\\)\"" nil t)
+                      (expand-file-name
+                       (match-string 1)
+                       (file-name-directory buffer-file-name))))))
+            (find-file File)
+          (message "No header file found"))))
 
   (nj/leader-keys
-    "y"   '((lambda () (interactive) (evil-use-register ?+) (call-interactively 'evil-yank)) :wk "Yank to system clipboard")
-    "Y"   '((lambda () (interactive) (evil-use-register ?+) (call-interactively 'evil-yank-line)) :wk "Yank to system clipboard")
-    "C-f" '(nj/find-file :wk "Find File")
-    "C-c" '(nj/compile :wk "Compile")
-    "C-r" '(nj/recompile :wk "Recompile")
-    "C-s" '(nj/shell-command :wk "Shell Command")
-    "C-a" '(nj/async-shell-command :wk "Async Shell Command")
-    "C-k" '(nj/force-kill-current-buffer :wk "Force kill the current buffer")
-    "d"   '(:ignore t :wk "Project")
-    "dp"  '(nj/project-switch-find-file :wk "Switch Projects")
-    "db"  '(project-switch-to-buffer :wk "Switch Buffers")
-    "f"   '(:ignore t :wk "Find")
-    "fk"  '(recentf :wk "Recent File")
-    "fi"  '(imenu :wk "Imenu")
-    "sd"  '(shell-command :wk "Shell Command")
-    "sa"  '(async-shell-command :wk "Async Shell Command")
-    "cj"  '(recompile :wk "Recompile")
-    "ck"  '(compile :wk "Compile")
-    "gh"  '(nj/open-remote :wk "Open remote repo in browser"))
+    "y"  '((lambda () (interactive) (evil-use-register ?+) (call-interactively 'evil-yank)) :wk "Yank to system clipboard")
+    "Y"  '((lambda () (interactive) (evil-use-register ?+) (call-interactively 'evil-yank-line)) :wk "Yank to system clipboard")
+    "f"  '(nj/find-file :wk "Find File")
+    "c"  '(nj/compile :wk "Compile")
+    "r"  '(nj/recompile :wk "Recompile")
+    "s"  '(nj/shell-command :wk "Shell Command")
+    "a"  '(nj/async-shell-command :wk "Async Shell Command")
+    "k"  '(nj/force-kill-current-buffer :wk "Force kill the current buffer")
+    "d"  '(:ignore t :wk "Project")
+    "i"  '(nj/imenu :wk "Imenu")
+    "dp" '(nj/project-switch-find-file :wk "Switch Projects")
+    "db" '(project-switch-to-buffer :wk "Switch Buffers")
+    "dr" '(recentf :wk "Recent File")
+    "ds" '(shell-command :wk "Shell Command")
+    "da" '(async-shell-command :wk "Async Shell Command")
+    "dj" '(recompile :wk "Recompile")
+    "dk" '(compile :wk "Compile")
+    "gh" '(nj/open-remote :wk "Open remote repo in browser"))
 
   (nj/leader-keys
     :keymaps 'markdown-mode-map
     "C-l" '(nj/markdown-insert-link-from-clipboard :wk "Insert link from clipboard"))
+
+  (nj/leader-keys
+    :keymaps '(c-mode-map c++-mode-map)
+    "C-t" '(nj-find-corresponding-file :wk "Find correspoding file"))
 
   (defun nj/paste-from-system ()
     (interactive)
@@ -751,7 +903,8 @@ Maybe I should just use `rust-mode` with `rust-mode-treesitter-derive`?
     (interactive)
     (call-interactively nj/expand-state))
 
-  (evil-define-key 'visual global-map (kbd "K") 'nj/expand)
+  ;; TODO: Find another bind
+  ;; (evil-define-key 'visual global-map (kbd "K") 'nj/expand)
 
   (defun nj/expand-advice-add (funcs)
     (dolist (f funcs)
@@ -964,9 +1117,4 @@ Also set TERM accordingly (xterm-256color) in the shell itself
       (unless (project-current)
         (call-process "git" nil nil nil "init"))
       (call-process "git" nil nil nil "add" env-file flake-file "flake.lock")))
-         #+end_src
-
-* Test
-#+begin_src emacs-lisp
-  (require 'dap-mode)
 #+end_src
