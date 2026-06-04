@@ -5,6 +5,7 @@
     ];
 
     userSettings = {
+        mainMonitor = "DP-2";
         hyprland = {
             enable = true;
             nvidia = true;

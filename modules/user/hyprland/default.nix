@@ -5,19 +5,20 @@
     ...
 }:
 let
-    cfg = config.userSettings.hyprland;
-    browser = config.userSettings.browser;
-    terminal = config.userSettings.terminal;
-    spotify = config.userSettings.spotify;
-    vicinae = config.userSettings.vicinae;
-    editor = config.userSettings.editor;
-    laptop = config.userSettings.laptop;
+    cfg         = config.userSettings.hyprland;
+    browser     = config.userSettings.browser;
+    terminal    = config.userSettings.terminal;
+    spotify     = config.userSettings.spotify;
+    vicinae     = config.userSettings.vicinae;
+    editor      = config.userSettings.editor;
+    laptop      = config.userSettings.laptop;
+    mainMonitor = config.userSettings.mainMonitor;
 
     themes = import ./themes.nix;
 
-    shader_path = ".config/hypr/shaders/vibrance.glsl";
+    shader_path    = ".config/hypr/shaders/vibrance.glsl";
     disable_shader = "hyprctl keyword decoration:screen_shader '';";
-    enable_shader = "hyprctl keyword decoration:screen_shader '~/${shader_path}'";
+    enable_shader  = "hyprctl keyword decoration:screen_shader '~/${shader_path}'";
 in
 {
     options = {
@@ -30,6 +31,13 @@ in
                 description = "Adds configuration to Hyprland";
             };
         };
+
+        userSettings.mainMonitor = lib.mkOption {
+            type        = lib.types.str;
+            description = "Main monitor";
+        };
+
+        userSettings.laptop = lib.mkEnableOption "Enable Laptop Settings";
     };
 
     config = lib.mkIf cfg.enable {
@@ -41,6 +49,29 @@ in
 
             playerctl
             brightnessctl
+
+            (writeShellScriptBin "change-wallpaper" ''
+            if [ -z "$1" ]; then
+                echo "Usage: change-wallpaper <path>"
+                exit 1
+            fi
+
+            Wallpaper=$(realpath "$1")
+
+            if [ ! -f "$Wallpaper" ]; then
+                echo "ERROR: File not found: $Wallpaper"
+                exit 1
+            fi
+
+            cat > ~/.config/hypr/hyprpaper.conf << EOF
+            splash = false;
+            wallpaper {
+                      monitor = ${mainMonitor}
+                      path    = $Wallpaper
+            }
+            EOF
+            hyprctl hyprpaper wallpaper "${mainMonitor}, $Wallpaper"
+            '')
         ];
 
         wayland.windowManager.hyprland.settings = lib.mkMerge [
@@ -215,7 +246,7 @@ in
 
             # Add extra config
             cfg.config
-            themes.borders
+            themes.simple
         ];
 
         home.sessionVariables = {
@@ -244,6 +275,8 @@ in
                 fade_timeout = 0;
             };
         };
+
+        services.hyprpaper.enable = true;
 
         home.file."${shader_path}".text = ''
 /*
