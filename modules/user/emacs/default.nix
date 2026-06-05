@@ -57,6 +57,8 @@ in
                     qml-mode
                     (treesit-grammars.with-grammars (
                         grammars: with grammars; [
+                            tree-sitter-c
+                            tree-sitter-cpp
                             tree-sitter-rust
                             tree-sitter-nix
                             tree-sitter-just

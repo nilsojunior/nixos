@@ -99,7 +99,8 @@ These remaps make the cursor stay centered in the screen while navigating
     (kbd "C-u") 'nj/scroll-up)
 
   (defun nj-recenter (&rest _)
-    (recenter))
+    (when (eq (window-buffer (selected-window)) (current-buffer))
+      (recenter)))
 
   (defun nj-recenter-list (&rest Fns)
     (dolist (F Fns)
@@ -111,6 +112,8 @@ These remaps make the cursor stay centered in the screen while navigating
    'next-error
    'evil-next-line
    'evil-previous-line
+   'dired-next-line
+   'dired-previous-line
    'evil-forward-paragraph  'org-forward-paragraph
    'evil-backward-paragraph 'org-backward-paragraph
    ;; 'evil-scroll-up
@@ -297,33 +300,33 @@ Disable line wrapping
 
 ** Face Attributes
 #+begin_src emacs-lisp
-  ;; (defvar nj/accent 'minibuffer-prompt)
+  (defvar nj/accent 'minibuffer-prompt)
 
-  ;; (set-face-attribute 'mode-line nil
-  ;;                     :inherit 'mode-line
-  ;;                     :foreground 'unspecified)
+  (set-face-attribute 'mode-line nil
+                      :inherit 'mode-line
+                      :foreground 'unspecified)
 
   ;; :background "#131520")
 
-  ;; (set-face-attribute 'mode-line-inactive nil
-  ;;                     :inherit 'mode-line
-  ;;                     :background 'unspecified)
+  (set-face-attribute 'mode-line-inactive nil
+                      :inherit 'mode-line
+                      :background 'unspecified)
 
-  ;; (set-face-attribute 'line-number-current-line nil
-  ;;                     :inherit 'nj/accent
-  ;;                     :background 'unspecified)
+  (set-face-attribute 'line-number-current-line nil
+                      :inherit 'nj/accent
+                      :background 'unspecified)
 
-  ;; (set-cursor-color (face-foreground nj/accent))
+  (set-cursor-color (face-foreground nj/accent))
 
-  ;; (set-face-attribute 'font-lock-variable-name-face nil
-  ;;                     :foreground nil)
+  (set-face-attribute 'font-lock-variable-name-face nil
+                      :foreground nil)
 
-  ;; (set-face-attribute 'font-lock-function-name-face nil
-  ;;                     :foreground (face-attribute 'font-lock-warning-face :foreground))
+  (set-face-attribute 'font-lock-function-name-face nil
+                      :foreground (face-attribute 'font-lock-warning-face :foreground))
 
-  ;; (set-face-attribute 'show-paren-match nil
-  ;;                     :background (face-foreground 'error nil 'default)
-  ;;                     :foreground (face-foreground 'default))
+  (set-face-attribute 'show-paren-match nil
+                      :background (face-foreground 'error nil 'default)
+                      :foreground (face-foreground 'default))
 
   ;; (defun nj/inherit-background (faces)
   ;;   (dolist (face faces)
@@ -335,6 +338,7 @@ Disable line wrapping
   ;;  '(fringe
   ;;    line-number))
 
+  ;; NOTE: Unused
   ;; tooltip
   ;; line-number-current-line
   ;; mode-line-inactive
@@ -361,11 +365,11 @@ Add the accent colour for symbols. In some modes I don't want `-` to be added.
        'append)))
 
   (defface nj/face-todo
-    '((t :foreground "Red" :weight bold :underline t))
+    '((t :foreground "#ffffff" :weight bold :underline t))
     "Faco for TODO.")
 
   (defface nj/face-note
-    '((t :foreground "Dark Green" :weight bold :underline t))
+    '((t :foreground "#ffffff" :weight bold :underline t))
     "Face for NOTE.")
 
   (defun nj/comments ()
@@ -383,54 +387,133 @@ Make the default font bold
   ;; (set-face-attribute 'default nil :weight 'bold)
 #+end_src
 
+Transparency
+#+begin_src emacs-lisp
+  (let ((Value 88))
+    (set-frame-parameter nil 'alpha-background Value)
+    (add-to-list 'default-frame-alist `(alpha-background . ,Value)))
+#+end_src
+
 ** Theme
 #+begin_src emacs-lisp
-  (add-to-list 'default-frame-alist '(font . "Liberation Mono Bold"))
-  (set-face-attribute 'default t :font "Liberation Mono Bold")
-  (let ((Orange    "#DAB98F")
-        (Comment   "gray50")
-        (Olive     "olive")
-        (Gold      "DarkGoldenrod3")
-        (OliveDrab "olive drab")
-        (Blue      "midnight blue")
-        (Highlight "blue3")
-        (Fg        "burlywood3")
-        ;; (Bg        "#161616")
-        (Bg        "#090909")
-        (Cursor    "#40FF40"))
+  (setq-default line-spacing 0.3)
+  (global-hl-line-mode t)
 
-    (set-face-attribute 'font-lock-builtin-face       nil :foreground Orange)
-    (set-face-attribute 'font-lock-comment-face       nil :foreground Comment)
-    (set-face-attribute 'font-lock-doc-face           nil :foreground Comment)
-    (set-face-attribute 'line-number                  nil :foreground Comment)
-    (set-face-attribute 'font-lock-constant-face      nil :foreground OliveDrab)
-    (set-face-attribute 'font-lock-string-face        nil :foreground OliveDrab)
-    (set-face-attribute 'font-lock-keyword-face       nil :foreground Gold)
-    (set-face-attribute 'font-lock-function-name-face nil :foreground Fg)
-    (set-face-attribute 'font-lock-type-face          nil :foreground Fg)
-    (set-face-attribute 'font-lock-variable-name-face nil :foreground Fg)
+  (set-face-attribute 'default nil
+                      :family "SF Mono"
+                      :weight 'bold
+                      :height 140)
 
-    (set-face-attribute 'org-block nil :foreground Fg)
+  (let ((Bg        "#000000")
+        (Fg        "#b0b0b0")
+        (Accent    "#ffffff")
+        (Comment   "#707070")
+        (Alt       "#ff00fe")
+        (Highlight "#141414"))
 
-    (global-hl-line-mode t)
-    (set-face-background 'hl-line Blue)
-    (set-face-attribute 'line-number-current-line     nil :foreground Comment)
+    (custom-set-faces
+     `(default                      ((t (:background ,Bg :foreground ,Fg))))
+     `(mode-line                    ((t (:background ,Bg :foreground ,Fg))))
+     `(show-paren-match             ((t (:background unspecified :foreground ,Accent :underline (:color ,Accent :style line)))))
+     `(show-paren-mismatch          ((t (:background unspecified :foreground ,Alt :underline (:color ,Alt :style line)))))
+     `(highlight                    ((t (:background ,Highlight))))
+     ;; No background
+     ;; `(mode-line-inactive           ((t (:box ,Bg))))
+     `(mode-line-inactive           ((t (:box unspecified))))
+     ;; NOTE: This doesn't work with transparency so I set a close colour that blends well with the background
+     ;; `(vertical-border              ((t (:foreground "#1c1b18"))))
+     `(vertical-border              ((t (:foreground "#080808"))))
+     ;; Foreground
+     `(font-lock-builtin-face       ((t (:foreground ,Fg))))
+     `(org-block                    ((t (:foreground ,Fg))))
+     ;; Accent
+     `(cursor                       ((t (:background ,Accent))))
+     `(font-lock-string-face        ((t (:foreground ,Accent))))
+     `(minibuffer-prompt            ((t (:foreground ,Accent))))
+     `(font-lock-keyword-face       ((t (:foreground ,Accent))))
+     `(font-lock-constant-face      ((t (:foreground ,Accent))))
+     `(font-lock-function-name-face ((t (:foreground ,Accent))))
+     `(font-lock-number-face        ((t (:foreground ,Accent))))
+     `(font-lock-type-face          ((t (:foreground ,Accent))))
+     ;; Comment
+     `(font-lock-comment-face       ((t (:foreground ,Comment))))
+     `(font-lock-doc-face           ((t (:foreground ,Comment))))
+     `(region                       ((t (:background ,Comment))))
+     `(isearch                      ((t (:background ,Comment))))
+     ;; Minibuffer
+     `(completions-common-part      ((t (:foreground ,Accent))))
+     `(icomplete-selected-match
+       ((t (:background unspecified
+                        :foreground ,Fg
+                        :box (:line-width 2 :color ,Accent :style nil)))))))
 
-    (set-face-attribute 'mode-line nil
-                        :foreground Comment
-                        :background Bg
-                        :weight 'bold
-                        :box nil)
+  ;; (defface nj-number-face
+  ;;   `((t (:foreground ,Accent)))
+  ;;   "Face for numbers.")
 
-    (copy-face 'mode-line 'mode-line-inactive)
+  ;; (defun nj-fontify-numbers-in-region (start end)
+  ;;   (save-excursion
+  ;;     (goto-char start)
+  ;;     (while (< (point) end)
+  ;;       (if (looking-at-p "[0-9]")
+  ;;           (let ((beg (point)))
+  ;;             (skip-chars-forward "0-9")
+  ;;             (put-text-property beg (point) 'font-lock-face 'nj-number-face))
+  ;;         (forward-char 1)))))
 
-    (set-face-attribute 'vertical-border nil :foreground Bg)
+  ;; (defun nj-fontify-numbers ()
+  ;;   (jit-lock-register #'nj-fontify-numbers-in-region))
 
-    (set-face-background 'highlight Highlight)
+  ;; (add-hook 'after-change-major-mode-hook 'nj-fontify-numbers))
+      #+end_src
 
-    (set-foreground-color Fg)
-    (set-background-color Bg)
-    (set-cursor-color Cursor))
+#+begin_src emacs-lisp
+  ;; (add-to-list 'default-frame-alist '(font . "Liberation Mono Bold"))
+  ;; (set-face-attribute 'default t :font "Liberation Mono Bold")
+  ;; (let ((Orange    "#DAB98F")
+  ;;       (Comment   "gray50")
+  ;;       (Olive     "olive")
+  ;;       (Gold      "DarkGoldenrod3")
+  ;;       (OliveDrab "olive drab")
+  ;;       (Blue      "midnight blue")
+  ;;       (Highlight "blue3")
+  ;;       (Fg        "burlywood3")
+  ;;       ;; (Bg        "#161616")
+  ;;       (Bg        "#090909")
+  ;;       (Cursor    "#40FF40"))
+
+  ;;   (set-face-attribute 'font-lock-builtin-face       nil :foreground Orange)
+  ;;   (set-face-attribute 'font-lock-comment-face       nil :foreground Comment)
+  ;;   (set-face-attribute 'font-lock-doc-face           nil :foreground Comment)
+  ;;   (set-face-attribute 'line-number                  nil :foreground Comment)
+  ;;   (set-face-attribute 'font-lock-constant-face      nil :foreground OliveDrab)
+  ;;   (set-face-attribute 'font-lock-string-face        nil :foreground OliveDrab)
+  ;;   (set-face-attribute 'font-lock-keyword-face       nil :foreground Gold)
+  ;;   (set-face-attribute 'font-lock-function-name-face nil :foreground Fg)
+  ;;   (set-face-attribute 'font-lock-type-face          nil :foreground Fg)
+  ;;   (set-face-attribute 'font-lock-variable-name-face nil :foreground Fg)
+
+  ;;   (set-face-attribute 'org-block nil :foreground Fg)
+
+  ;;   (global-hl-line-mode t)
+  ;;   (set-face-background 'hl-line Blue)
+  ;;   (set-face-attribute 'line-number-current-line     nil :foreground Comment)
+
+  ;;   (set-face-attribute 'mode-line nil
+  ;;                       :foreground Comment
+  ;;                       :background Bg
+  ;;                       :weight 'bold
+  ;;                       :box nil)
+
+  ;;   (copy-face 'mode-line 'mode-line-inactive)
+
+  ;;   (set-face-attribute 'vertical-border nil :foreground Bg)
+
+  ;;   (set-face-background 'highlight Highlight)
+
+  ;;   (set-foreground-color Fg)
+  ;;   (set-background-color Bg)
+  ;;   (set-cursor-color Cursor))
 
   ;; (set-face-attribute 'icomplete-selected-match nil
   ;;                     :foreground 'unspecified
@@ -860,19 +943,24 @@ Maybe I should just use `rust-mode` with `rust-mode-treesitter-derive`?
 
 ** Modes
 #+begin_src emacs-lisp
-  ;; (setq treesit-font-lock-level 3
-  ;;       nix-ts-mode-indent-offset 4
-  ;;       rust-ts-mode-indent-offset 4
-  ;;       lua-ts-mode-indent-offset 4
-  ;;       just-ts-mode-indent-offset 4)
+  (setq treesit-font-lock-level 3
+        c-ts-mode-indent-offset 4
+        c-ts-mode-indent-offset 4
+        nix-ts-mode-indent-offset 4
+        rust-ts-mode-indent-offset 4
+        lua-ts-mode-indent-offset 4
+        just-ts-mode-indent-offset 4)
 
-  ;; (setq major-mode-remap-alist
-  ;;       '((nix-mode . nix-ts-mode)
-  ;; (rust-mode . rust-ts-mode)
-  ;; (lua-mode . lua-ts-mode)
-  ;; (just-mode . just-ts-mode)
-  ;; (markdown-mode . markdown-ts-mode)))
+  (setq major-mode-remap-alist
+        '((c-mode        . c-ts-mode)
+          (c++-mode      . c++-ts-mode)
+          (nix-mode      . nix-ts-mode)
+          (rust-mode     . rust-ts-mode)
+          (lua-mode      . lua-ts-mode)
+          (just-mode     . just-ts-mode)
+          (markdown-mode . markdown-ts-mode)))
 
+  (setq c-ts-mode-indent-style 'bsd)
   (setq c-basic-offset 4)
 
   (defun nj/set-indentation (modes)
