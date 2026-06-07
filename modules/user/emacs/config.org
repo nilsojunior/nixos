@@ -379,8 +379,8 @@ Add the accent colour for symbols. In some modes I don't want `-` to be added.
        ("\\<NOTE\\>" 0 'nj/face-note t))))
 
   ;; (add-hook 'after-change-major-mode-hook 'nj/colours)
-  (add-hook 'prog-mode-hook 'nj/comments)
-    #+end_src
+  (add-hook 'after-change-major-mode-hook 'nj/comments)
+#+end_src
 
 Make the default font bold
 #+begin_src emacs-lisp
