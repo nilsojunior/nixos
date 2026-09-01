@@ -775,6 +775,7 @@ Keybinds
 * ORG MODE
 #+begin_src emacs-lisp
   (setq org-modern-star 'replace
+        org-modern-block-fringe nil
         org-ellipsis " ▾")
   ;; org-hide-emphasis-markers t
   (with-eval-after-load 'org (global-org-modern-mode))
