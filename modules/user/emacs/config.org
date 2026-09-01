@@ -99,7 +99,8 @@ These remaps make the cursor stay centered in the screen while navigating
     (kbd "C-u") 'nj/scroll-up)
 
   (defun nj-recenter (&rest _)
-    (when (eq (window-buffer (selected-window)) (current-buffer))
+    (when (and (bound-and-true-p evil-mode)
+               (eq (window-buffer (selected-window)) (current-buffer)))
       (recenter)))
 
   (defun nj-recenter-list (&rest Fns)
