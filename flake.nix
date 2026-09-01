@@ -1,5 +1,5 @@
 {
-    description = "Hyprland on Nixos";
+    description = "One flake to rule them all";
 
     inputs = {
         nixpkgs.url = "nixpkgs/nixos-unstable";
@@ -24,6 +24,21 @@
             url = "github:vicinaehq/vicinae";
             # inputs.nixpkgs.follows = "nixpkgs";
         };
+
+        vicinae-extensions = {
+            url = "github:vicinaehq/extensions";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
+
+        zen-browser = {
+            url = "github:youwen5/zen-browser-flake";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
+    };
+
+    nixConfig = {
+        extra-substituters = [ "https://vicinae.cachix.org" ];
+        extra-trusted-public-keys = [ "vicinae.cachix.org-1:1kDrfienkGHPYbkpNj1mWTr7Fm1+zcenzgTizIcI3oc=" ];
     };
 
     outputs =
