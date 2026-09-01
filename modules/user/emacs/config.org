@@ -309,6 +309,7 @@ Disable line wrapping
 
   (set-face-attribute 'mode-line nil
                       :inherit 'mode-line
+                      :height  130
                       :foreground 'unspecified)
 
   ;; :background "#131520")
@@ -321,7 +322,12 @@ Disable line wrapping
                       :inherit 'nj/accent
                       :background 'unspecified)
 
-  (set-cursor-color (face-foreground nj/accent))
+  (set-face-attribute 'org-block nil
+                      :background 'unspecified)
+
+  ;; (set-cursor-color (face-foreground nj/accent))
+  ;; (set-cursor-color "#737ea3")
+  (set-cursor-color "#eb6f92")
 
   (set-face-attribute 'font-lock-variable-name-face nil
                       :foreground nil)
