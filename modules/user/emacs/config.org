@@ -546,12 +546,12 @@ Transparency
   (defun nj/buffer-name ()
     (if (buffer-file-name)
         (if-let* ((p (project-current))
-  				(p-root (project-root p))
-  				(p-name (project-name p)))
-  		  ;; (format "%s/%s" p-name
-  		  (format "%s"
-  				  (file-relative-name (buffer-file-name) p-root))
-  		(abbreviate-file-name (buffer-file-name)))
+      			(p-root (project-root p))
+      			(p-name (project-name p)))
+      	  ;; (format "%s/%s" p-name
+      	  (format "%s"
+      			  (file-relative-name (buffer-file-name) p-root))
+      	(abbreviate-file-name (buffer-file-name)))
       (buffer-name)))
 
   (setq-default mode-line-format
