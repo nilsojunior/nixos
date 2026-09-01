@@ -286,12 +286,16 @@ Highlight text when yanking
 * Visuals
 #+begin_src emacs-lisp
   (blink-cursor-mode 0)
-  (set-fringe-mode 0)
 
   (setq display-line-numbers-type 'relative)
   (global-display-line-numbers-mode 1)
   (setq-default truncate-lines t)
   (setq truncate-lines t)
+#+end_src
+
+Transparent fringe
+#+begin_src emacs-lisp
+  (set-face-attribute 'fringe nil :background nil :foreground nil)
 #+end_src
 
 Disable line wrapping
