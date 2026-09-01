@@ -405,15 +405,21 @@ Transparency
     (add-to-list 'default-frame-alist `(alpha-background . ,Value)))
 #+end_src
 
-** Theme
+** Themes
 #+begin_src emacs-lisp
-  (setq-default line-spacing 0.3)
-  (global-hl-line-mode t)
+  (setq-default line-spacing 0.4)
+  ;; (global-hl-line-mode t)
 
   (set-face-attribute 'default nil
                       :family "SF Mono"
                       :weight 'bold
-                      :height 140)
+                      :height 130)
+#+end_src
+
+** Monochrome
+#+begin_src emacs-lisp :tangle nj-monochrome-theme.el :mkdirp yes
+  (deftheme nj-monochrome
+    "Almost monochrome theme.")
 
   (let ((Bg        "#000000")
         (Fg        "#b0b0b0")
@@ -457,6 +463,8 @@ Transparency
        ((t (:background unspecified
                         :foreground ,Fg
                         :box (:line-width 2 :color ,Accent :style nil)))))))
+
+  (provide-theme 'nj-monochrome)
 
   ;; (defface nj-number-face
   ;;   `((t (:foreground ,Accent)))
