@@ -554,6 +554,10 @@ Transparency
       	(abbreviate-file-name (buffer-file-name)))
       (buffer-name)))
 
+  ;; From here: https://emacsredux.com/blog/2026/07/21/right-aligned-mode-line-elements/
+  ;; Align to the left edge of the right fringe (default is 'window)
+  (setq mode-line-right-align-edge 'right-fringe)
+
   (setq-default mode-line-format
   			  '("%e"
   				(" ")
