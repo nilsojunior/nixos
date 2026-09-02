@@ -620,7 +620,7 @@ Imenu
                     (switch-to-buffer (marker-buffer Marker))
                     (goto-char Marker)) ;; NOTE: Recenter?
                 (imenu Entry))))))))
-       #+end_src
+#+end_src
 
 Keybinds
 #+begin_src emacs-lisp
@@ -1095,6 +1095,19 @@ Also set TERM accordingly (xterm-256color) in the shell itself
   (evil-define-key 'insert vterm-mode-map (kbd "C-c") 'vterm--self-insert)
   (add-hook 'vterm-mode-hook (lambda () (display-line-numbers-mode 0)))
 
+  (defun nj/kill-vterm ()
+    (interactive)
+    (let* ((buf  (current-buffer))
+           (proc (get-buffer-process buf)))
+      (when proc
+        (set-process-query-on-exit-flag proc nil)
+        (kill-process proc))
+      (kill-buffer buf)))
+
+  (nj/leader-keys
+    :keymaps 'vterm-mode-map
+    "C-k" '(nj/kill-vterm :wk "Kill current buffer"))
+
   (defun nj/toggle-vterm-in-buffer (n)
     (interactive "P")
     (if (eq major-mode 'vterm-mode)
@@ -1114,8 +1127,8 @@ Also set TERM accordingly (xterm-256color) in the shell itself
               (vterm vterm-buffer-name))))
       (nj/toggle-vterm-in-buffer n)))
 
-  (nj/leader-keys "te" '(nj/toggle-vterm :wk "Toggle vterm"))
-  (nj/leader-keys "td" '(nj/toggle-vterm-in-buffer :wk "Toggle vterm"))
+  (nj/leader-keys "C-t" '(nj/toggle-vterm :wk "Toggle vterm"))
+  (nj/leader-keys "td" '(nj/toggle-vterm-in-buffer :wk "Toggle vterm in buffer"))
 #+end_src
 
 * Envrc
