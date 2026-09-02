@@ -177,7 +177,7 @@ Add blank lines
     (kbd "C-a") 'nj/insert-blank-line-below)
 #+end_src
 
-Make `C-c` behave live `ESC`
+Make `C-c` behave like `ESC`
 #+begin_src emacs-lisp
   (evil-define-key '(insert visual) global-map (kbd "C-c") 'evil-normal-state)
 #+end_src
