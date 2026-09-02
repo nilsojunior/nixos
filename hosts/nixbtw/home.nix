@@ -5,6 +5,7 @@
     ];
 
     userSettings = {
+        mainMonitor = "eDP-1";
         laptop = true;
         hyprland.enable = true;
         zsh.enable = true;
