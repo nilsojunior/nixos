@@ -484,7 +484,7 @@ Transparency
   ;;   (jit-lock-register #'nj-fontify-numbers-in-region))
 
   ;; (add-hook 'after-change-major-mode-hook 'nj-fontify-numbers))
-      #+end_src
+#+end_src
 
 #+begin_src emacs-lisp
   ;; (add-to-list 'default-frame-alist '(font . "Liberation Mono Bold"))
@@ -543,27 +543,85 @@ Transparency
 
 ** Mode Line
 #+begin_src emacs-lisp
-  (defun nj/buffer-name ()
-    (if (buffer-file-name)
-        (if-let* ((p (project-current))
-      			(p-root (project-root p))
-      			(p-name (project-name p)))
-      	  ;; (format "%s/%s" p-name
-      	  (format "%s"
-      			  (file-relative-name (buffer-file-name) p-root))
-      	(abbreviate-file-name (buffer-file-name)))
-      (buffer-name)))
-
   ;; From here: https://emacsredux.com/blog/2026/07/21/right-aligned-mode-line-elements/
   ;; Align to the left edge of the right fringe (default is 'window)
   (setq mode-line-right-align-edge 'right-fringe)
 
+  (defvar-local nj-mode-line-buffer-name
+      '(:eval
+        (cond
+         ((buffer-file-name)
+          (concat
+           (propertize
+            " " 'face '(:height 0.9))
+           (propertize
+            (if-let* ((p      (project-current))
+                      (p-root (project-root p))
+                      (p-name (project-name p)))
+                ;; (format "%s/%s" p-name)
+                (format "%s"
+                        (file-relative-name (buffer-file-name) p-root))
+              (abbreviate-file-name (buffer-file-name)))
+            'face '(:height 0.9))))
+         (t
+          (buffer-name)))))
+
+  (defvar-local nj-mode-line-separator-begin
+      '(:eval
+        (propertize
+         " ▏" 'face '(:foreground "black"))))
+
+  (defun nj-mode-line-propertize-text (str)
+    (concat
+     (propertize
+      str 'face '(:height 0.8))
+     (propertize
+      " ▏" 'face '(:foreground "black"))))
+
+  (defvar-local nj-mode-line-line-number
+      '(:eval
+        (nj-mode-line-propertize-text "Line: %l")))
+
+  (defvar-local nj-mode-line-col-number
+      '(:eval
+        (nj-mode-line-propertize-text "Col: %c")))
+
+  (defvar-local nj-mode-line-spaces
+      '(:eval
+        (nj-mode-line-propertize-text (format "Spaces: %d" standard-indent))))
+
+  (defvar-local nj-mode-line-total-lines
+      '(:eval
+        (nj-mode-line-propertize-text
+         (format "Lines: %d" (count-lines (point-min) (point-max))))))
+
+  (defvar-local nj-mode-line-branch-name
+      '(:eval
+        (when-let ((branch (magit-get-current-branch)))
+          (nj-mode-line-propertize-text branch))))
+
+  (dolist (construct '(nj-mode-line-buffer-name
+                       nj-mode-line-branch-name
+                       nj-mode-line-separator-begin
+                       nj-mode-line-separator-end
+                       nj-mode-line-line-number
+                       nj-mode-line-col-number
+                       nj-mode-line-spaces
+                       nj-mode-line-total-lines))
+    (put construct 'risky-local-variable t))
+
   (setq-default mode-line-format
-  			  '("%e"
-  				(" ")
-  				(:propertize
-  				 (:eval (nj/buffer-name))
-  				 )))
+                '("%e"
+                  mode-line-front-space
+                  nj-mode-line-buffer-name
+                  mode-line-format-right-align
+                  nj-mode-line-separator-begin
+                  nj-mode-line-branch-name
+                  nj-mode-line-line-number
+                  nj-mode-line-col-number
+                  nj-mode-line-total-lines
+                  nj-mode-line-spaces
+                  mode-line-end-spaces))
 #+end_src
 
 ** Keybindings
@@ -578,8 +636,8 @@ Imenu
          ((string= (car Entry) "*Rescan*"))
          ((imenu--subalist-p Entry)
           (setq Items (nconc Items (nj/imenu--flatten (cdr Entry)))))
-      (t
-       (push Entry Items))))))
+         (t
+          (push Entry Items))))))
 
   (defun nj/imenu ()
     (interactive)
