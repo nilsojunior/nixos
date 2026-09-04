@@ -1288,13 +1288,13 @@ Also set TERM accordingly (xterm-256color) in the shell itself
          "            system = \"x86_64-linux\";\n"
          "            pkgs = import nixpkgs { inherit system; };\n"
          "        in\n"
-         "          {\n"
-         "              devShells.${system}.default = pkgs.mkShell {\n"
-         "                  buildInputs = with pkgs; [\n"
+         "        {\n"
+         "            devShells.${system}.default = pkgs.mkShell {\n"
+         "                buildInputs = with pkgs; [\n"
          pkgs-list
-         "                  ];\n"
-         "              };\n"
-         "          };\n"
+         "                ];\n"
+         "            };\n"
+         "        };\n"
          "}"))
       (envrc-reload)
       (unless (project-current)
