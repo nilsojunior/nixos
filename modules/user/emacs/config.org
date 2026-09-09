@@ -144,7 +144,7 @@ These remaps make the cursor stay centered in the screen while navigating
     "N" 'nj-search-prev)
 
   (advice-add 'evil-force-normal-state :before #'nj-search-clear-overlays)
-                    #+end_src
+#+end_src
 
 Compilation and universal argument
 #+begin_src emacs-lisp
@@ -1144,6 +1144,13 @@ Also set TERM accordingly (xterm-256color) in the shell itself
 
   ;; (define-advice compilation-filter (:around (f proc string) xterm-color)
   ;;   (funcall f proc (xterm-color-filter string)))
+#+end_src
+
+*** Pyright
+Compilations errors for pyright, taken from [[https://hadi.timachi.com/posts/python_IDE_interactions_in_emacs_without_LSP/python_IDE_interactions_in_emacs_without_LSP][here]].
+#+begin_src emacs-lisp
+  (push 'pyright compilation-error-regexp-alist)
+  (push '(pyright "^\\ +\\(.+\\):\\([0-9]+\\):\\([0-9]+\\).+$" 1 2 3) compilation-error-regexp-alist-alist)
 #+end_src
 
 * Magit
