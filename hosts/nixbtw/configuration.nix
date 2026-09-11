@@ -1,5 +1,12 @@
-{ config, lib, pkgs, ... }:
-
+{
+    config,
+    lib,
+    pkgs,
+    ...
+}:
+let
+    common = import ./common.nix;
+in
 {
     imports = [
         ./hardware-configuration.nix
@@ -17,17 +24,18 @@
         ];
 
     systemSettings = {
-        user = "nilso";
+        user            = "nilso";
         pipewire.enable = true;
-        hyprland.enable = true;
+        hyprland.enable = common.hyprland.enable;
         stylix = {
-            enable = true;
-            theme = "gruvboxing";
+            enable = common.stylix.enable;
+            theme  = common.stylix.theme;
         };
         kanata.enable = true;
     };
 
-    services.upower.enable = true;
+    services.upower.enable    = true;
+    hardware.bluetooth.enable = true;
 
     system.stateVersion = "25.11";
 }
