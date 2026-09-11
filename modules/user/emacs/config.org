@@ -1031,7 +1031,8 @@ Maybe I should just use `rust-mode` with `rust-mode-treesitter-derive`?
         nix-ts-mode-indent-offset 4
         rust-ts-mode-indent-offset 4
         lua-ts-mode-indent-offset 4
-        just-ts-mode-indent-offset 4)
+        just-ts-mode-indent-offset 4
+        sgml-basic-offset 4)
 
   (setq major-mode-remap-alist
         '((c-mode        . c-ts-mode)
