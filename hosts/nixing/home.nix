@@ -1,4 +1,11 @@
-{ config, lib, pkgs, ... }:
+{
+    config,
+    lib,
+    pkgs, ...
+}:
+let
+    common = import ./common.nix;
+in
 {
     imports = [
         ../../modules/user
@@ -7,10 +14,10 @@
     userSettings = {
         mainMonitor = "DP-2";
         hyprland = {
-            enable = true;
+            enable = common.hyprland.enalbe;
             nvidia = true;
             config = {
-                "$main" = "DP-2";
+                "$main"   = "DP-2";
                 "$second" = "HDMI-A-1";
                 monitor = [
                     "$main, 1920x1080@240, 0x1080, 1"
@@ -30,19 +37,19 @@
                 ];
             };
         };
-        zsh.enable = true;
-        browser = "firefox";
-        editor = "emacs";
-        terminal = "kitty";
+        zsh.enable     = true;
+        browser        = "firefox";
+        editor         = "emacs";
+        terminal       = "kitty";
         keepass.enable = true;
-        git.enable = true;
-        emacs.enable = true;
+        git.enable     = true;
+        emacs.enable   = true;
         stylix = {
-            enable = true;
-            theme = "gruvboxing";
+            enable = common.stylix.enable;
+            theme  = common.stylix.theme;
         };
         spotify.enable = true;
-        ssh.enable = true;
+        ssh.enable     = true;
         vicinae.enable = true;
     };
 

@@ -4,7 +4,9 @@
     pkgs,
     ...
 }:
-
+let
+    common = import ./common.nix;
+in
 {
     imports = [
         ./hardware-configuration.nix
@@ -20,13 +22,13 @@
         ];
 
     systemSettings = {
-        user = "nilso";
+        user            = "nilso";
         pipewire.enable = true;
-        hyprland.enable = true;
-        nvidia.enable = true;
+        hyprland.enable = common.hyprland.enable;
+        nvidia.enable   = true;
         stylix = {
-            enable = true;
-            theme = "gruvboxing";
+            enable = common.stylix.enable;
+            theme  = common.stylix.theme;
         };
     };
 
