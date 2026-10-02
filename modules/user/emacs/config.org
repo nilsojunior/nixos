@@ -937,9 +937,19 @@ This will go to the next line or previous if fido-vertica-mode is enabled. Other
     (kbd "C-k") 'icomplete-backward-completions
     (kbd "C-j") 'icomplete-forward-completions)
 
+  (defun nj/next-minibuffer-completion (n)
+    (interactive "p")
+    (next-history-element n)
+    (end-of-line))
+
+  (defun nj/previous-minibuffer-completion (n)
+    (interactive "p")
+    (previous-history-element n)
+    (end-of-line))
+
   (evil-define-key 'insert minibuffer-local-map
-    (kbd "C-k") 'previous-line-or-history-element
-    (kbd "C-j") 'next-line-or-history-element)
+    (kbd "C-k") 'nj/previous-minibuffer-completion
+    (kbd "C-j") 'nj/next-minibuffer-completion)
 #+end_src
 
 * Ansi Colours
