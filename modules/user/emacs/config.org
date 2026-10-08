@@ -1052,19 +1052,21 @@ Maybe I should just use `rust-mode` with `rust-mode-treesitter-derive`?
           (rust-mode     . rust-ts-mode)
           (lua-mode      . lua-ts-mode)
           (just-mode     . just-ts-mode)
-          (markdown-mode . markdown-ts-mode)))
+          (markdown-mode . markdown-ts-mode)
+          (python-mode   . python-ts-mode)))
 
   (setq c-ts-mode-indent-style 'bsd)
   (setq c-basic-offset 4)
 
-  (defun nj/set-indentation (modes)
-    (dolist (mode modes)
-      (add-hook mode (lambda () (setq tab-width 4)))))
+  ;; NOTE: Is this necessary?
+  ;; (defun nj/set-indentation (modes)
+  ;;   (dolist (mode modes)
+  ;;     (add-hook mode (lambda () (setq tab-width 4)))))
 
-  (nj/set-indentation '(nix-mode-hook
-                        rust-mode-hook
-                        lua-mode-hook
-                        just-mode-hook))
+  ;; (nj/set-indentation '(nix-mode-hook
+  ;;                       rust-mode-hook
+  ;;                       lua-mode-hook
+  ;;                       just-mode-hook))
 #+end_src
 
 * Language Servers

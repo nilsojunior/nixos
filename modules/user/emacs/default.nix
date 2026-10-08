@@ -66,6 +66,7 @@ in
                             tree-sitter-markdown
                             tree-sitter-typst
                             tree-sitter-glsl
+                            tree-sitter-python
                         ]
                     ))
                 ];
