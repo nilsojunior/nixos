@@ -43,11 +43,22 @@ in
                 setopt PROMPT_SUBST
                 PROMPT=$PROMPT'%{$(vterm_prompt_end)%}'
 
+                # NOTE: Vim mode
+                bindkey -v
+                KEYTIMEOUT=1
             '';
 
-            shellAliases = {
-                v = "nvim";
-            };
+            # NOTE: Using this instead of .zshrc so emacs can see the aliases
+            envExtra = ''
+                alias launch="hyprctl dispatch exec"
+                alias grep="grep --color=always"
+                alias cp="cp --interactive"
+                alias mv="mv --interactive"
+                alias mkdir="mkdir --parents"
+                alias v="nvim"
+                alias cat="bat"
+                alias ..="cd .."
+            '';
         };
     };
 }
