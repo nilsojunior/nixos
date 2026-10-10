@@ -4,6 +4,7 @@
 
 * Early-Init
 #+begin_src emacs-lisp :tangle early-init.el
+  ;; -*- lexical-binding: t -*-
   (menu-bar-mode -1)
   (tool-bar-mode -1)
   (scroll-bar-mode -1)
@@ -22,6 +23,7 @@ Disable startup message
 * Evil Mode
 ** Before Evil
 #+begin_src emacs-lisp
+  ;; -*- lexical-binding: t -*-
   (setq-default indent-tabs-mode nil
                 tab-width 4)
 
@@ -308,7 +310,6 @@ Disable line wrapping
   (defvar nj/accent 'minibuffer-prompt)
 
   (set-face-attribute 'mode-line nil
-                      :inherit 'mode-line
                       :height  130
                       :foreground 'unspecified)
 
