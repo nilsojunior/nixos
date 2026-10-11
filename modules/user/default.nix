@@ -1,4 +1,10 @@
-{ pkgs, lib, config, ... }:
+{
+    pkgs,
+    lib,
+    config,
+    inputs,
+    ...
+}:
 
 {
     imports = [
@@ -19,6 +25,7 @@
     home.file.".config/nvim".source = ./nvim;
 
     home.pointerCursor = {
+        enable = true;
         gtk.enable = true;
         package = pkgs.adwaita-icon-theme;
         name = "Adwaita";

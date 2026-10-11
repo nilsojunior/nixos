@@ -131,7 +131,8 @@ in
                 };
 
                 dwindle = {
-                    pseudotile = true;
+                    # TODO: This is broken
+                    # pseudotile = true;
                     preserve_split = true;
                     force_split = 2; # Always split to the right
                 };
