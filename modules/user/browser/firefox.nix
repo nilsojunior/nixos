@@ -136,9 +136,12 @@ font-size: 12px;
     opacity: 0;
 }
 
-.tabbrowser-tab:not([selected="true"]):not(:hover) .tab-content {
+/* NOTE: This stopped working in new version of firefox */
+/* .tabbrowser-tab:not([selected="true"]):not(:hover) .tab-content { */
+
+.tabbrowser-tab:not([selected]):not([multiselected]):not(:hover) .tab-content {
     opacity: 0.5;
-                     }
+}
 
 :root {
 	--uc-navbar-transform: calc(0px - var(--tab-min-height) - 3px);
@@ -259,6 +262,14 @@ menupopup{
 
 .urlbar-background {
     background: #${config.lib.stylix.colors.base01} !important;
+}
+.urlbarView-background {
+    background: #${config.lib.stylix.colors.base01} !important;
+}
+
+/* "This time, search with:" bar */
+.search-one-offs {
+    display: none !important;
 }
 
 /* Find Bar */
