@@ -6,9 +6,9 @@
     ...
 }:
 let
-    cfg = config.userSettings.firefox;
+    cfg     = config.userSettings.firefox;
     keepass = config.userSettings.keepass.enable;
-    stylix = config.userSettings.stylix.enable;
+    stylix  = config.userSettings.stylix.enable;
 in
 {
     options = {
@@ -20,7 +20,7 @@ in
             enable = true;
             profiles.nilso = {
                 extensions = {
-                    # Do i need this?
+                    # NOTE: Do I need this?
                     force = true;
                     packages =
                         with inputs.firefox-addons.packages."x86_64-linux";
@@ -90,11 +90,14 @@ in
                     # Top left icon
                     "browser.tabs.firefox-view" = false;
 
-                    # TODO: check how to do this
+                    # TODO: Check how to do this
                     # File picker
                     # "widget.use-xdg-desktop-portal.file-picker" = 1;
 
                     "full-screen-api.ignore-widgets" = true;
+
+                    # Disable Firefox new UI
+                    "browser.nova.enabled" = false;
                 };
 
                 userChrome = /* CSS */ ''
