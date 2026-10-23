@@ -4,10 +4,10 @@
     ...
 }:
 let
-    cfg = config.systemSettings.pipewire;
+    cfg    = config.systemSettings.pipewire;
+    laptop = config.systemSettings.laptop;
 in
 {
-
     options = {
         systemSettings.pipewire.enable = lib.mkEnableOption "Enable Pipewire";
     };
@@ -18,6 +18,26 @@ in
             pulse.enable = true;
             alsa.enable = true;
             alsa.support32Bit = true;
+
+            wireplumber.extraConfig = if !laptop then {
+                    "51-prefer-headset" = {
+                        "monitor.alsa.rules" = [
+                            {
+                                matches = [
+                                    {
+                                        "node.name" = "~alsa_output.usb-Logitech_G733.*";
+                                    }
+                                ];
+                                actions = {
+                                    "update-props" = {
+                                        "priority.driver" = 2000;
+                                        "priority.session" = 2000;
+                                    };
+                                };
+                            }
+                        ];
+                    };
+                } else {};
 
             extraConfig.pipewire."10-eq" = {
                 "context.modules" = [
