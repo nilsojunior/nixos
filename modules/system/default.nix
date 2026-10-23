@@ -41,9 +41,12 @@
         # Journal (logs)
         # Limit size and things to optimize boot speed
         journald = {
-            extraConfig = "SystemMaxUse=50M\nSystemMaxFiles=5";
-            rateLimitBurst = 500;
-            rateLimitInterval = "30s";
+            settings.Journal = {
+                SystemMaxUse      = "50M";
+                SystemMaxFiles    = 5;
+                RateLimitBurst    = 500;
+                RateLimitInterval = "30s";
+            };
         };
 
         getty.autologinUser = config.systemSettings.user;
