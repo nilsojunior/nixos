@@ -1,9 +1,10 @@
 #+TITLE: Nilso's GNU Emacs Config
 #+AUTHOR: Nilso Junior
 #+DESCRIPTION: Nilso's Emacs config
+#+PROPERTY: header-args :tangle ~/.emacs.d/init.el
 
 * Early-Init
-#+begin_src emacs-lisp :tangle early-init.el
+#+begin_src emacs-lisp :tangle ~/.emacs.d/early-init.el
   ;; -*- lexical-binding: t -*-
   (menu-bar-mode -1)
   (tool-bar-mode -1)
@@ -15,7 +16,7 @@
 #+end_src
 
 Disable startup message
-#+begin_src emacs-lisp :tangle early-init.el
+#+begin_src emacs-lisp :tangle ~/.emacs.d/early-init.el
   (defun display-startup-echo-area-message ()
     (message ""))
 #+end_src
@@ -295,11 +296,6 @@ Highlight text when yanking
   (setq truncate-lines t)
 #+end_src
 
-Transparent fringe
-#+begin_src emacs-lisp
-  (set-face-attribute 'fringe nil :background nil :foreground nil)
-#+end_src
-
 Disable line wrapping
 #+begin_src emacs-lisp
   (global-visual-line-mode 0)
@@ -309,36 +305,42 @@ Disable line wrapping
 #+begin_src emacs-lisp
   (defvar nj/accent 'minibuffer-prompt)
 
-  (set-face-attribute 'mode-line nil
-                      :height  130
-                      :foreground 'unspecified)
+  (defun nj/theme-overrides ()
+    (set-face-attribute 'mode-line nil
+                        :height  130
+                        :foreground 'unspecified)
 
-  ;; :background "#131520")
+    ;; :background "#131520")
 
-  (set-face-attribute 'mode-line-inactive nil
-                      :inherit 'mode-line
-                      :background 'unspecified)
+    (set-face-attribute 'mode-line-inactive nil
+                        :inherit 'mode-line
+                        :background 'unspecified)
 
-  (set-face-attribute 'line-number-current-line nil
-                      :inherit 'nj/accent
-                      :background 'unspecified)
+    (set-face-attribute 'line-number-current-line nil
+                        :inherit 'nj/accent
+                        :background 'unspecified)
 
-  (set-face-attribute 'org-block nil
-                      :background 'unspecified)
+    (set-face-attribute 'org-block nil
+                        :background 'unspecified)
 
-  ;; (set-cursor-color (face-foreground nj/accent))
-  ;; (set-cursor-color "#737ea3")
-  (set-cursor-color "#eb6f92")
+    ;; (set-cursor-color (face-foreground nj/accent))
+    ;; (set-cursor-color "#737ea3")
+    (set-cursor-color "#eb6f92")
 
-  (set-face-attribute 'font-lock-variable-name-face nil
-                      :foreground nil)
+    (set-face-attribute 'font-lock-variable-name-face nil
+                        :foreground nil)
 
-  (set-face-attribute 'font-lock-function-name-face nil
-                      :foreground (face-attribute 'font-lock-warning-face :foreground))
+    (set-face-attribute 'font-lock-function-name-face nil
+                        :foreground (face-attribute 'font-lock-warning-face :foreground))
 
-  (set-face-attribute 'show-paren-match nil
-                      :background (face-foreground 'error nil 'default)
-                      :foreground (face-foreground 'default))
+    (set-face-attribute 'show-paren-match nil
+                        :background (face-foreground 'error nil 'default)
+                        :foreground (face-foreground 'default))
+
+    ;; NOTE: Transparent fringe
+    (set-face-attribute 'fringe nil :background nil :foreground nil))
+
+  (add-hook 'after-init-hook 'nj/theme-overrides)
 
   ;; (defun nj/inherit-background (faces)
   ;;   (dolist (face faces)
@@ -377,11 +379,11 @@ Add the accent colour for symbols. In some modes I don't want `-` to be added.
        'append)))
 
   (defface nj/face-todo
-    '((t :foreground "#ffffff" :weight bold :underline t))
+    '((t :foreground "red" :weight bold :underline t))
     "Faco for TODO.")
 
   (defface nj/face-note
-    '((t :foreground "#ffffff" :weight bold :underline t))
+    '((t :foreground "green" :weight bold :underline t))
     "Face for NOTE.")
 
   (defun nj/comments ()
@@ -390,7 +392,7 @@ Add the accent colour for symbols. In some modes I don't want `-` to be added.
      '(("\\<TODO\\>" 0 'nj/face-todo t)
        ("\\<NOTE\\>" 0 'nj/face-note t))))
 
-  ;; (add-hook 'after-change-major-mode-hook 'nj/colours)
+  (add-hook 'after-change-major-mode-hook 'nj/colours)
   (add-hook 'after-change-major-mode-hook 'nj/comments)
 #+end_src
 
@@ -409,16 +411,11 @@ Transparency
 ** Themes
 #+begin_src emacs-lisp
   (setq-default line-spacing 0.4)
-  ;; (global-hl-line-mode t)
-
-  (set-face-attribute 'default nil
-                      :family "SF Mono"
-                      :weight 'bold
-                      :height 130)
+  (global-hl-line-mode t)
 #+end_src
 
 ** Monochrome
-#+begin_src emacs-lisp :tangle nj-monochrome-theme.el :mkdirp yes
+#+begin_src emacs-lisp :tangle ~/.emacs.d/nj-monochrome-theme.el
   (deftheme nj-monochrome
     "Almost monochrome theme.")
 
@@ -549,28 +546,28 @@ Transparency
   (setq mode-line-right-align-edge 'right-fringe)
 
   (defvar-local nj-mode-line-buffer-name
-      '(:eval
-        (cond
-         ((buffer-file-name)
-          (concat
-           (propertize
-            " " 'face '(:height 0.9))
-           (propertize
-            (if-let* ((p      (project-current))
-                      (p-root (project-root p))
-                      (p-name (project-name p)))
-                ;; (format "%s/%s" p-name)
-                (format "%s"
-                        (file-relative-name (buffer-file-name) p-root))
-              (abbreviate-file-name (buffer-file-name)))
-            'face '(:height 0.9))))
-         (t
-          (buffer-name)))))
+    '(:eval
+      (cond
+       ((buffer-file-name)
+        (concat
+         (propertize
+          " " 'face '(:height 0.9))
+         (propertize
+          (if-let* ((p      (project-current))
+                    (p-root (project-root p))
+                    (p-name (project-name p)))
+              ;; (format "%s/%s" p-name)
+              (format "%s"
+                      (file-relative-name (buffer-file-name) p-root))
+            (abbreviate-file-name (buffer-file-name)))
+          'face '(:height 0.9))))
+       (t
+        (buffer-name)))))
 
   (defvar-local nj-mode-line-separator-begin
-      '(:eval
-        (propertize
-         " ▏" 'face '(:foreground "black"))))
+    '(:eval
+      (propertize
+       " ▏" 'face '(:foreground "black"))))
 
   (defun nj-mode-line-propertize-text (str)
     (concat
@@ -580,26 +577,26 @@ Transparency
       " ▏" 'face '(:foreground "black"))))
 
   (defvar-local nj-mode-line-line-number
-      '(:eval
-        (nj-mode-line-propertize-text "Line: %l")))
+    '(:eval
+      (nj-mode-line-propertize-text "Line: %l")))
 
   (defvar-local nj-mode-line-col-number
-      '(:eval
-        (nj-mode-line-propertize-text "Col: %c")))
+    '(:eval
+      (nj-mode-line-propertize-text "Col: %c")))
 
   (defvar-local nj-mode-line-spaces
-      '(:eval
-        (nj-mode-line-propertize-text (format "Spaces: %d" standard-indent))))
+    '(:eval
+      (nj-mode-line-propertize-text (format "Spaces: %d" standard-indent))))
 
   (defvar-local nj-mode-line-total-lines
-      '(:eval
-        (nj-mode-line-propertize-text
-         (format "Lines: %d" (count-lines (point-min) (point-max))))))
+    '(:eval
+      (nj-mode-line-propertize-text
+       (format "Lines: %d" (count-lines (point-min) (point-max))))))
 
   (defvar-local nj-mode-line-branch-name
-      '(:eval
-        (when-let ((branch (magit-get-current-branch)))
-          (nj-mode-line-propertize-text branch))))
+    '(:eval
+      (when-let ((branch (magit-get-current-branch)))
+        (nj-mode-line-propertize-text branch))))
 
   (dolist (construct '(nj-mode-line-buffer-name
                        nj-mode-line-branch-name
@@ -1155,10 +1152,10 @@ Also set TERM accordingly (xterm-256color) in the shell itself
 
 ** Compilation
 #+begin_src emacs-lisp
-  ;; (setq compilation-environment '("TERM=xterm-256color"))
+  (setq compilation-environment '("TERM=xterm-256color"))
 
-  ;; (define-advice compilation-filter (:around (f proc string) xterm-color)
-  ;;   (funcall f proc (xterm-color-filter string)))
+  (define-advice compilation-filter (:around (f proc string) xterm-color)
+    (funcall f proc (xterm-color-filter string)))
 #+end_src
 
 *** Pyright
@@ -1177,7 +1174,7 @@ Compilations errors for pyright, taken from [[https://hadi.timachi.com/posts/pyt
 #+begin_src emacs-lisp
   (require 'vterm)
   (evil-define-key 'insert vterm-mode-map (kbd "C-c") 'vterm--self-insert)
-  (add-hook 'vterm-mode-hook (lambda () (display-line-numbers-mode 0)))
+  (add-hook 'vterm-mode-hook (lambda () (display-line-numbers-mode 0) (setq-local global-hl-line-mode nil)))
 
   (defun nj/kill-vterm ()
     (interactive)
@@ -1324,9 +1321,8 @@ Compilations errors for pyright, taken from [[https://hadi.timachi.com/posts/pyt
       (call-process "git" nil nil nil "add" env-file flake-file "flake.lock")))
 #+end_src
 
-* Test
+* Nj Mode
 #+begin_src emacs-lisp
-  (evil-mode -1)
   (global-display-line-numbers-mode -1)
   ;; (set-fringe-mode '(10 . 0))
 
@@ -1631,7 +1627,7 @@ Compilations errors for pyright, taken from [[https://hadi.timachi.com/posts/pyt
     :global t)
 
   ;; (nj-global-mode)
-  (evil-mode)
+  ;; (evil-mode -1)
 
   (defvar nj-recenter-after
     '(newline
@@ -1660,8 +1656,4 @@ Compilations errors for pyright, taken from [[https://hadi.timachi.com/posts/pyt
       (recenter)))
 
   (add-hook 'post-command-hook #'nj-recenter-when-needed)
-                            #+end_src
-
-* Test
-#+begin_src emacs-lisp
 #+end_src

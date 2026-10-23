@@ -13,9 +13,10 @@ in
     };
 
     config = lib.mkIf cfg.enable {
-        stylix.targets.emacs.enable = false;
+        stylix.targets.emacs.enable = true;
         home.packages = with pkgs; [
-            liberation_ttf
+            # liberation_ttf
+            # googlesans-code
         ];
         programs.emacs = {
             enable = true;
@@ -71,14 +72,13 @@ in
                     ))
                 ];
 
+            # NOTE: Add laptop font and condition
             extraConfig = ''
-                    (org-babel-load-file
-                        (expand-file-name
-                        "config.org"
-                        user-emacs-directory))
-                '';
+                (set-face-attribute 'default nil
+                      :family "SF Mono"
+                      :weight 'bold
+                      :height 130)
+            '';
         };
-
-        home.file.".emacs.d/config.org".source = ./config.org;
     };
 }
