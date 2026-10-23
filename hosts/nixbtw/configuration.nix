@@ -25,6 +25,7 @@ in
 
     systemSettings = {
         user            = "nilso";
+        laptop          = common.laptop;
         pipewire.enable = true;
         hyprland.enable = common.hyprland.enable;
         stylix = {

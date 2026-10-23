@@ -30,6 +30,7 @@ in
             enable = common.stylix.enable;
             theme  = common.stylix.theme;
         };
+        kanata.enable = true;
     };
 
     services.udev.packages = [ pkgs.vial ];
