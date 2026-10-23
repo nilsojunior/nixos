@@ -1323,3 +1323,345 @@ Compilations errors for pyright, taken from [[https://hadi.timachi.com/posts/pyt
         (call-process "git" nil nil nil "init"))
       (call-process "git" nil nil nil "add" env-file flake-file "flake.lock")))
 #+end_src
+
+* Test
+#+begin_src emacs-lisp
+  (evil-mode -1)
+  (global-display-line-numbers-mode -1)
+  ;; (set-fringe-mode '(10 . 0))
+
+  ;; NOTE: Distinguish RET from C-m
+  (define-key input-decode-map [?\C-m] [C-m])
+
+  (defun nj-forward-WORD (n)
+    (interactive "p")
+    (dotimes (_ n)
+      ;; Current whitespace
+      (skip-chars-forward "^ \t\n")
+      ;; Next whitespace
+      (skip-chars-forward " \t\n")))
+
+  (defun nj-backwards-WORD (n)
+    (interactive "p")
+    (dotimes (_ n)
+      ;; Current whitespace
+      (skip-chars-backward " \t\n")
+      ;; Previous whitespace
+      (skip-chars-backward "^ \t\n")))
+
+  (defun nj-open-below (n)
+    (interactive "p")
+    (dotimes (_ n)
+      (end-of-line)
+      (newline-and-indent)))
+
+  (defun nj-open-above (n)
+    (interactive "p")
+    (dotimes (_ n)
+      (previous-line)
+      (end-of-line)
+      (newline-and-indent)))
+
+  (defun nj-forward-select-line (n)
+    (interactive "p")
+    (cond
+     ((region-active-p)
+      (deactivate-mark))
+     (t
+      (set-mark (line-beginning-position))
+      (forward-line n))))
+
+  (defun nj-paste-after (n)
+    (interactive "p")
+    (let ((text (current-kill 0)))
+      (cond
+       ((string-suffix-p "\n" text)
+        (forward-line 1)
+        (beginning-of-line)
+        (insert text)
+        (forward-line -1)
+        (back-to-indentation))
+       (t
+        ;; (unless (eolp)
+        ;;   (forward-char 1))
+        (insert text)
+        (backward-char 1)))))
+
+  (defun nj-paste-before (n)
+    (interactive "p")
+    (let ((text (current-kill 0)))
+      (cond
+       ((string-suffix-p "\n" text)
+        (beginning-of-line)
+        (insert text)
+        (forward-line -1)
+        (back-to-indentation))
+       (t
+        (insert text)
+        (backward-char 1)))))
+
+  (defun nj-yank-line ()
+    "Copy the line the cursor is currently on."
+    (interactive)
+    (save-excursion
+      (copy-region-as-kill
+       (line-beginning-position)
+       (line-beginning-position 2))))
+
+  (defun nj-yank ()
+    "Copy the selected region if any, run `nj-yank-line' otherwise."
+    (interactive)
+    (cond
+     ((region-active-p)
+      (kill-ring-save (region-beginning) (region-end)))
+     (t
+      (nj-yank-line))))
+
+  (defun nj-goto-char-forward (c)
+    (interactive "c")
+    (let ((pos (save-excursion
+                 (forward-char 1)
+                 (search-forward (char-to-string c) (line-end-position) t))))
+      (when pos
+        (goto-char pos))))
+
+  (defvar nj--current-paren nil)
+
+  (defun nj--select-parens (c direction &optional around)
+    (let* ((pairs     '((?\( . ?\)) (?\[ . ?\]) (?\{ . ?\}) (?\< . ?\>)))
+           (open-char  (or (car (rassoc c pairs)) c))
+           (close-char (or (cdr (assoc c pairs)) c))
+           (state      (syntax-ppss))
+           (open       (or (seq-find (lambda (pos) (eq (char-after pos) open-char))
+                                     (reverse (nth 9 state)))
+                           ;; Not inside paren, search for the next
+                           (when direction
+                             (save-excursion
+                               (cond
+                                ((eq direction 'forward)
+                                 (when (search-forward (char-to-string open-char) nil t)
+                                   (1- (point))))
+                                ((eq direction 'backward)
+                                 (when (search-backward (char-to-string open-char) nil t)
+                                   (point))))))))
+           (end (and open
+                     (or (scan-sexps open 1)
+                         ;; Fallback
+                         (save-excursion
+                           (when (search-forward (char-to-string close-char) nil t)
+                             (point)))))))
+      (when open
+        (unless around
+          (setq open (1+ open)
+                end  (1- end)))
+        (setq nj--current-paren c)
+        (cons open end))))
+
+  (defun nj-select-region (pos)
+    (push-mark (car pos) nil t)
+    (goto-char (cdr pos)))
+
+  (defun nj--select-inside (c)
+    (when-let ((parens (nj--select-parens c 'forward)))
+      (nj-select-region parens)))
+
+  (defun nj-increment-selection ()
+    (interactive)
+    (let ((region
+           (save-excursion
+             (forward-char 1)
+             (nj--select-parens nj--current-paren 'forward))))
+      (when region
+        (nj-select-region region))))
+
+  (defun nj-decrement-selection ()
+    (interactive)
+    (let ((region
+           (or
+            ;; Find nested paren
+            (save-excursion
+              (save-restriction
+                (narrow-to-region (mark) (point))
+                (goto-char (point-min))
+                (nj--select-parens nj--current-paren 'forward)))
+            ;; Search backwards
+            (save-excursion
+              ;; Start from the beginnig of the mark instead of point
+              (goto-char (mark))
+              (backward-char)
+              (nj--select-parens nj--current-paren 'backward)))))
+      (when region
+        (nj-select-region region))))
+
+  (defvar nj-visual-mode-map
+    (let ((map (make-sparse-keymap)))
+      (define-key map (kbd "e") #'nj-increment-selection)
+      (define-key map (kbd "n") #'nj-decrement-selection)
+      (define-key map (kbd "=") #'indent-region)
+      map)
+    "Keymaps for visual mode.")
+
+  (define-minor-mode nj-visual-mode
+    "Minor mode for region selection."
+    :init-value nil
+    :lighter    nil
+    :keymap     nj-visual-mode-map)
+
+  (defun nj--visual-mode-enable ()
+    (nj-visual-mode 1))
+
+  (defun nj--visual-mode-disable ()
+    (nj-visual-mode -1))
+
+  (add-hook 'activate-mark-hook #'nj--visual-mode-enable)
+  (add-hook 'deactivate-mark-hook #'nj--visual-mode-disable)
+
+  (defmacro nj-define-select-inside (fn c)
+    `(defun ,fn ()
+       (interactive)
+       (nj--select-inside ,c)))
+
+  (nj-define-select-inside nj-select-inside-parentheses ?\()
+  (nj-define-select-inside nj-select-inside-brackets    ?\{)
+  (nj-define-select-inside nj-select-inside-square      ?\[)
+  (nj-define-select-inside nj-select-inside-arrows      ?\<)
+
+  (nj-define-select-inside nj-select-inside-single-quotes ?\')
+  (nj-define-select-inside nj-select-inside-double-quotes ?\")
+
+  ;; (defun nj-test (opening closing &optinal around)
+  ;;   (interactive)
+  ;;   (let ((opening-char (string-to-char opening))
+  ;;         (closing-char (string-to-char closing))
+  ;;         (open close))
+  ;;     (save-excursion
+  ;;       ;; Inside parens
+  ;;       (let ((depth 0))
+  ;;         (while (not open)
+  ;;           (backward-char)
+  ;;           (cond
+  ;;            ((eq (char-after closing-char) (setq depth (1+ depth))))
+  ;;            ((eq (char-after opening-char)))
+  ;;            (cond
+  ;;             ((zerop depth)
+  ;;              (setq open (point)))
+  ;;             (t
+  ;;              (setq depth (1- depth)))))))
+  ;;       ;; Search for the next opening paren
+  ;;       (unless open
+  ;;         (save-excursion
+  ;;           (when (search-forward opening nil t)
+  ;;             (setq open (1- (point))))))
+  ;;       (when open
+  ;;         (save-excursion
+  ;;           (goto-char (1+ open))
+  ;;           (while (not close)
+  ;;             (cond
+  ;;              ((eq (char-after opening-char) (setq depth (1+ depth))))
+  ;;              ((eq (char-after closing-char)))
+  ;;              (cond
+  ;;               ((zerop depth)
+  ;;                (setq close (1+ (point)))
+  ;;                (t
+  ;;                 (setq depth (1- depth)))))
+  ;;              (forward-char)))))
+  ;;       (when (and open close)
+  ;;         (let ((beg (cond around
+  ;;                          (open
+  ;; (t
+
+  (defvar nj-mode-select-inside-map
+    (let ((map (make-sparse-keymap)))
+      (define-key map (kbd "C-p") #'nj-select-inside-parentheses)
+      (define-key map (kbd "C-b") #'nj-select-inside-brackets)
+      (define-key map (kbd "C-s") #'nj-select-inside-square)
+      (define-key map (kbd "C-z") #'nj-select-inside-arrows)
+      (define-key map (kbd "C-'") #'nj-select-inside-single-quotes)
+      (define-key map (kbd "C-q") #'nj-select-inside-double-quotes)
+      (define-key map (kbd "C-a") #'nj-test)
+      map)
+    "Prefix map for selection.")
+
+  (defvar nj-mode-map
+    (let ((map (make-sparse-keymap)))
+      (define-key map (kbd "C-,") nj-mode-select-inside-map)
+      (define-key map (kbd "C-a") #'kill-word)
+
+      (define-key map (kbd "C-n") #'next-line)
+      (define-key map (kbd "C-e") #'previous-line)
+      (define-key map (kbd "C-S-n") #'nj-open-below)
+      (define-key map (kbd "C-S-e") #'nj-open-above)
+
+      (define-key map (kbd "C-t") #'forward-word)
+      (define-key map (kbd "C-r") #'backward-word)
+      (define-key map (kbd "C-S-t") #'nj-forward-WORD)
+      (define-key map (kbd "C-S-r") #'nj-backwards-WORD)
+
+      (define-key map (kbd "C-h") #'forward-char)
+      (define-key map (kbd "C-y") #'backward-char)
+
+      (define-key map (kbd "C-p") #'back-to-indentation)
+      (define-key map (kbd "C-u") #'end-of-line)
+
+      (define-key map (kbd "<C-m>") #'forward-paragraph)
+      (define-key map (kbd "C-w") #'backward-paragraph)
+
+      (define-key map (kbd "C-f") #'nj-yank)
+      (define-key map (kbd "C-o") #'kill-whole-line)
+
+      (define-key map (kbd "C-d") #'nj-paste-after)
+      (define-key map (kbd "C-S-d") #'nj-paste-before)
+
+      (define-key map (kbd "C-=") #'indent-according-to-mode)
+
+      (define-key map (kbd "C-s") #'nj-goto-char-forward)
+      (define-key map (kbd "C-i") #'nj-forward-select-line)
+      ;; (define-key map (kbd "C-,") #'nj-select-inside)
+
+      ;; Alt
+      (define-key map (kbd "M-,") #'undo)
+      (define-key map (kbd "M-z") #'undo-redo)
+
+      map)
+    "Keymap for `nj-mode`.")
+
+  (define-minor-mode nj-global-mode
+    "Custom keybinds."
+    :keymap nj-mode-map
+    :global t)
+
+  ;; (nj-global-mode)
+  (evil-mode)
+
+  (defvar nj-recenter-after
+    '(newline
+      previous-error
+      next-error
+      next-line
+      previous-line
+      dired-next-line
+      dired-previous-line
+      org-forward-paragraph
+      org-backward-paragraph
+      forward-word
+      backward-word
+      forward-paragraph
+      backward-paragraph
+      nj-forward-WORD
+      nj-backwards-WORD
+      nj-open-below
+      nj-open-above
+      nj-forword-select-line)
+    "List of commands that should recenter the window.")
+
+  (defun nj-recenter-when-needed ()
+    (when (and nj-global-mode
+               (memq this-command nj-recenter-after))
+      (recenter)))
+
+  (add-hook 'post-command-hook #'nj-recenter-when-needed)
+                            #+end_src
+
+* Test
+#+begin_src emacs-lisp
+#+end_src
