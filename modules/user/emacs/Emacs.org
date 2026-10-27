@@ -180,9 +180,11 @@ Add blank lines
     (kbd "C-a") 'nj/insert-blank-line-below)
 #+end_src
 
-Make `C-c` behave like `ESC`
+Insert mode keybinds to mimic Vim's behaviour.
 #+begin_src emacs-lisp
-  (evil-define-key '(insert visual) global-map (kbd "C-c") 'evil-normal-state)
+  (evil-define-key 'insert global-map
+    (kbd "C-h") [backspace]
+    (kbd "C-j") [return])
 #+end_src
 
 Buffer navigation
