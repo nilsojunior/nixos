@@ -47,7 +47,7 @@ in
             # NOTE: Using this instead of .zshrc so emacs can see the aliases
             envExtra = ''
                 alias launch="hyprctl dispatch exec"
-                alias grep="grep --color=always"
+                alias grep="grep --color=auto"
                 alias cp="cp --interactive"
                 alias mv="mv --interactive"
                 alias mkdir="mkdir --parents"
