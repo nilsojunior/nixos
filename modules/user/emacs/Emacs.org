@@ -733,8 +733,8 @@ Keybinds
 
   (defun nj/compile ()
     (interactive)
-    (setq nj/CompileCommand (read-shell-command "Compile command: " nil 'compile-history))
     (nj/project-or-default-directory
+     (setq nj/CompileCommand (read-shell-command "Compile command: " nil 'compile-history))
      (compile nj/CompileCommand)))
 
   (defun nj/recompile ()
