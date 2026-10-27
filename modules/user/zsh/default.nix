@@ -42,10 +42,6 @@ in
                 }
                 setopt PROMPT_SUBST
                 PROMPT=$PROMPT'%{$(vterm_prompt_end)%}'
-
-                # NOTE: Vim mode
-                bindkey -v
-                KEYTIMEOUT=1
             '';
 
             # NOTE: Using this instead of .zshrc so emacs can see the aliases
