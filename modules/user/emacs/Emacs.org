@@ -671,8 +671,8 @@ Imenu
                                            (line-beginning-position)
                                            (line-end-position))))))
                              (Label (if Line
-                                        (format "%s %s" Func
-                                                (propertize Line 'face '(:foreground "Red"))))))
+                                        (string-trim (format "%s %s" Func
+                                                (propertize Line 'face '(:foreground "Red")))))))
                         (push (cons Label Marker) Items))))))))))
       (if (null Items)
           (message "No imenu entries found.")
