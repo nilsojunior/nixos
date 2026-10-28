@@ -790,6 +790,15 @@ Keybinds
             (find-file File)
           (message "No header file found"))))
 
+  (defun nj/grep ()
+    "Grep for a string, if input is empty grep for the last string in history."
+    (interactive)
+    (nj/project-or-default-directory
+     (let ((string (read-string "Grep: " nil 'grep-history)))
+       (when (string-empty-p string)
+         (setq string (car grep-history)))
+       (grep (format "grep --recursive --line-number %s" string)))))
+
   (nj/leader-keys
     "y"  '((lambda () (interactive) (evil-use-register ?+) (call-interactively 'evil-yank)) :wk "Yank to system clipboard")
     "Y"  '((lambda () (interactive) (evil-use-register ?+) (call-interactively 'evil-yank-line)) :wk "Yank to system clipboard")
@@ -801,6 +810,7 @@ Keybinds
     "k"  '(nj/force-kill-current-buffer :wk "Force kill the current buffer")
     "d"  '(:ignore t :wk "Project")
     "i"  '(nj/imenu :wk "Imenu")
+    "g"  '(nj/grep :wk "Grep")
     "dp" '(nj/project-switch-find-file :wk "Switch Projects")
     "db" '(project-switch-to-buffer :wk "Switch Buffers")
     "dr" '(recentf :wk "Recent File")
@@ -808,7 +818,7 @@ Keybinds
     "da" '(async-shell-command :wk "Async Shell Command")
     "dj" '(recompile :wk "Recompile")
     "dk" '(compile :wk "Compile")
-    "gh" '(nj/open-remote :wk "Open remote repo in browser"))
+    "dg" '(nj/open-remote :wk "Open remote repo in browser"))
 
   (nj/leader-keys
     :keymaps 'markdown-mode-map
