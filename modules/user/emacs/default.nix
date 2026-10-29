@@ -2,6 +2,7 @@
     config,
     lib,
     pkgs,
+    inputs,
     ...
 }:
 let
@@ -23,6 +24,7 @@ in
             package = pkgs.emacs-pgtk;
             extraPackages =
                 epkgs: with epkgs; [
+                    inputs.nj-search.packages.${pkgs.stdenv.hostPlatform.system}.default
                     evil
                     evil-collection
                     evil-commentary

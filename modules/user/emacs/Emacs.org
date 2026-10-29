@@ -134,7 +134,6 @@ These remaps make the cursor stay centered in the screen while navigating
    'evil-undo
    'evil-redo)
 
-  (add-to-list 'load-path (expand-file-name "nj-search" user-emacs-directory))
   (require 'nj-search)
   (nj-search-mode 1)
 

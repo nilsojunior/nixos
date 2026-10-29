@@ -24,6 +24,11 @@
             url = "github:vicinaehq/vicinae";
             # inputs.nixpkgs.follows = "nixpkgs";
         };
+
+        nj-search = {
+            url                    = "github:nilsojunior/nj-search";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
     };
 
     outputs =
