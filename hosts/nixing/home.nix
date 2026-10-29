@@ -14,7 +14,7 @@ in
     userSettings = {
         mainMonitor = "DP-2";
         hyprland = {
-            enable = common.hyprland.enalbe;
+            enable = common.hyprland.enable;
             nvidia = true;
             config = {
                 "$main"   = "DP-2";
