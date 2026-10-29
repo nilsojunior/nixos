@@ -550,36 +550,43 @@ Transparency
   ;; Align to the left edge of the right fringe (default is 'window)
   (setq mode-line-right-align-edge 'right-fringe)
 
+  (defface nj/mode-line-buffer-name
+    '((t :height 0.9))
+    "Face for the modeline buffer name.")
+
+  (defface nj/mode-line-separator
+    '((t :height 1.4 :foreground "black"))
+    "Face for the modeline separator.")
+
+  (defconst nj/mode-line-raise 0.15)
+
   (defvar-local nj-mode-line-buffer-name
     '(:eval
-      (cond
-       ((buffer-file-name)
-        (concat
-         (propertize
-          " " 'face '(:height 0.9))
-         (propertize
-          (if-let* ((p      (project-current))
-                    (p-root (project-root p))
-                    (p-name (project-name p)))
-              ;; (format "%s/%s" p-name)
-              (format "%s"
-                      (file-relative-name (buffer-file-name) p-root))
-            (abbreviate-file-name (buffer-file-name)))
-          'face '(:height 0.9))))
-       (t
-        (buffer-name)))))
+      (propertize
+       (if-let* ((file (buffer-file-name)))
+           (concat
+            " "
+            (if-let* ((p      (project-current))
+                      (p-root (project-root p))
+                      (p-name (project-name p)))
+                ;; (format "%s/%s" p-name)
+                (file-relative-name file p-root)
+              (abbreviate-file-name file)))
+         (buffer-name))
+       'face 'nj/mode-line-buffer-name 'display `(raise ,nj/mode-line-raise))))
 
   (defvar-local nj-mode-line-separator-begin
     '(:eval
       (propertize
-       " ▏" 'face '(:foreground "black"))))
+       " ▏" 'face 'nj/mode-line-separator)))
 
-  (defun nj-mode-line-propertize-text (str)
+  (defun nj-mode-line-propertize-text (str &optional last)
     (concat
      (propertize
-      str 'face '(:height 0.8))
-     (propertize
-      " ▏" 'face '(:foreground "black"))))
+      str 'face '(:height 0.8) 'display `(raise ,nj/mode-line-raise))
+     (unless last
+       (propertize
+        " ▏" 'face 'nj/mode-line-separator))))
 
   (defvar-local nj-mode-line-line-number
     '(:eval
@@ -591,7 +598,7 @@ Transparency
 
   (defvar-local nj-mode-line-spaces
     '(:eval
-      (nj-mode-line-propertize-text (format "Spaces: %d" standard-indent))))
+      (nj-mode-line-propertize-text (format "Spaces: %d" standard-indent) t)))
 
   (defvar-local nj-mode-line-total-lines
     '(:eval
@@ -601,7 +608,8 @@ Transparency
   (defvar-local nj-mode-line-branch-name
     '(:eval
       (when-let ((branch (magit-get-current-branch)))
-        (nj-mode-line-propertize-text branch))))
+        (unless (string-equal branch "main")
+          (nj-mode-line-propertize-text branch)))))
 
   (dolist (construct '(nj-mode-line-buffer-name
                        nj-mode-line-branch-name
