@@ -37,7 +37,7 @@ in
                         tab      q    w    e    r    t    y    u    i    o    p    [    ]   \
                         @esctrl  a    s    d    f    g    h    j    k    l    ;    '    ret
                         lsft     z    x    c    v    b    n    m    ,    .    /    rsft
-                                 lmet lalt           spc            ralt .    .    rctl
+                                 lmet lalt           spc            ralt left down right
                     )
                 '';
             };
