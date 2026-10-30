@@ -254,7 +254,9 @@ Align
     work for the operators like `+` or `*` but I'm not sure."
     (interactive "<r>")
     (evil-indent beg end)
-    (align-regexp beg end "\\(\\s-*\\)\\S-*=" 1 1 t))
+    (align-regexp beg end "^\\(.*?\\)\\(\\s-*\\)=" 2 1 t)
+    (when (derived-mode-p 'python-mode)
+      (align-regexp beg end "\\(\\s-*\\)import" 1 1 nil)))
 
   (evil-define-operator nj/align-char (beg end char)
     "Indent and align a single character."
