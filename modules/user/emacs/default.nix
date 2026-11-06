@@ -58,6 +58,7 @@ in
                     typst-ts-mode
                     glsl-mode
                     qml-mode
+                    yaml-mode
                     (treesit-grammars.with-grammars (
                         grammars: with grammars; [
                             tree-sitter-c
@@ -70,6 +71,7 @@ in
                             tree-sitter-typst
                             tree-sitter-glsl
                             tree-sitter-python
+                            tree-sitter-yaml
                         ]
                     ))
                 ];
