@@ -308,7 +308,7 @@ Disable line wrapping
 #+begin_src emacs-lisp
   (defvar nj/accent 'minibuffer-prompt)
 
-  (defun nj/theme-overrides ()
+  (defun nj/theme-overrides (&rest _)
     (set-face-attribute 'mode-line nil
                         :height  130
                         :foreground 'unspecified)
@@ -346,7 +346,7 @@ Disable line wrapping
     ;; NOTE: Transparent fringe
     (set-face-attribute 'fringe nil :background nil :foreground nil))
 
-  (add-hook 'after-init-hook 'nj/theme-overrides)
+  (add-hook 'enable-theme-functions 'nj/theme-overrides)
 
   ;; (defun nj/inherit-background (faces)
   ;;   (dolist (face faces)
