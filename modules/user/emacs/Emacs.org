@@ -954,7 +954,8 @@ This will go to the next line or previous if fido-vertica-mode is enabled. Other
 #+begin_src emacs-lisp
   (savehist-mode 1)
   (recentf-mode 1)
-  (setq recentf-max-saved-items 100)
+  (setq recentf-max-saved-items 100
+        completions-sort 'historical)
 
   (fido-vertical-mode)
   (evil-define-key 'insert icomplete-fido-mode-map
