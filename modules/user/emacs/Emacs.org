@@ -1343,12 +1343,19 @@ Compilations errors for pyright, taken from [[https://hadi.timachi.com/posts/pyt
       (with-temp-file env-file
         (insert "use flake\n"))
 
-      (call-process "nix" nil nil nil "flake" "lock")
-
       (unless (project-current)
         (call-process "git" nil nil nil "init"))
-      (call-process "git" nil nil nil "add" env-file flake-file "flake.lock"))
-    (envrc-allow))
+      (call-process "git" nil nil nil "add" env-file flake-file)
+
+      (call-process "nix" nil nil nil "flake" "lock")
+      (call-process "git" nil nil nil "add" "flake.lock")
+
+      ;; (setq-local envrc--env-dir default-directory)
+      ;; NOTE: Dired doesn't trigger a environment refresh
+      (when (bound-and-true-p envrc-mode)
+        (envrc-mode -1))
+      (envrc-mode 1)
+      (envrc-allow)))
 #+end_src
 
 * Nj Mode
