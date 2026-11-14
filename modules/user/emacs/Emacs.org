@@ -1343,9 +1343,11 @@ Compilations errors for pyright, taken from [[https://hadi.timachi.com/posts/pyt
       (with-temp-file env-file
         (insert "use flake\n"))
 
+      (call-process "nix" nil nil nil "flake" "lock")
+
       (unless (project-current)
         (call-process "git" nil nil nil "init"))
-      (call-process "git" nil nil nil "add" env-file flake-file))
+      (call-process "git" nil nil nil "add" env-file flake-file "flake.lock"))
     (envrc-allow))
 #+end_src
 
