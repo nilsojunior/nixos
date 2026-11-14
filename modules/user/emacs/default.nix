@@ -72,6 +72,8 @@ in
                             tree-sitter-glsl
                             tree-sitter-python
                             tree-sitter-yaml
+                            tree-sitter-css
+                            tree-sitter-tsx
                         ]
                     ))
                 ];
