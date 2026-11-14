@@ -1315,10 +1315,6 @@ Compilations errors for pyright, taken from [[https://hadi.timachi.com/posts/pyt
 
       (make-directory default-directory t)
 
-      (with-temp-file env-file
-        (insert "use flake"))
-      (envrc-allow)
-
       (with-temp-file flake-file
         (insert
          "{\n"
@@ -1332,7 +1328,7 @@ Compilations errors for pyright, taken from [[https://hadi.timachi.com/posts/pyt
          "        { self, nixpkgs }:\n"
          "        let\n"
          "            system = \"x86_64-linux\";\n"
-         "            pkgs = import nixpkgs { inherit system; };\n"
+         "            pkgs   = import nixpkgs { inherit system; };\n"
          "        in\n"
          "        {\n"
          "            devShells.${system}.default = pkgs.mkShell {\n"
@@ -1342,10 +1338,14 @@ Compilations errors for pyright, taken from [[https://hadi.timachi.com/posts/pyt
          "            };\n"
          "        };\n"
          "}"))
-      (envrc-reload)
+
+      (with-temp-file env-file
+        (insert "use flake\n"))
+
       (unless (project-current)
         (call-process "git" nil nil nil "init"))
-      (call-process "git" nil nil nil "add" env-file flake-file "flake.lock")))
+      (call-process "git" nil nil nil "add" env-file flake-file))
+    (envrc-allow))
 #+end_src
 
 * Nj Mode
