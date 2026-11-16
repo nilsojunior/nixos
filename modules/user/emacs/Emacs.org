@@ -1081,7 +1081,9 @@ Maybe I should just use `rust-mode` with `rust-mode-treesitter-derive`?
           (lua-mode      . lua-ts-mode)
           (just-mode     . just-ts-mode)
           (markdown-mode . markdown-ts-mode)
-          (python-mode   . python-ts-mode)))
+          (python-mode   . python-ts-mode)
+          (css-mode      . css-ts-mode)
+          (mhtml-mode     . html-ts-mode)))
 
   (setq c-ts-mode-indent-style 'bsd)
   (setq c-basic-offset 4)
