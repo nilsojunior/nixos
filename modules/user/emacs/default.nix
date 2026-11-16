@@ -75,6 +75,8 @@ in
                             tree-sitter-css
                             tree-sitter-tsx
                             tree-sitter-html
+                            tree-sitter-javascript
+                            tree-sitter-jsdoc
                         ]
                     ))
                 ];
