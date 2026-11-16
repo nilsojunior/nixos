@@ -74,6 +74,7 @@ in
                             tree-sitter-yaml
                             tree-sitter-css
                             tree-sitter-tsx
+                            tree-sitter-html
                         ]
                     ))
                 ];
