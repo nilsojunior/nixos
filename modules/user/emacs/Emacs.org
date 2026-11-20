@@ -344,7 +344,10 @@ Disable line wrapping
                         :foreground (face-foreground 'default))
 
     ;; NOTE: Transparent fringe
-    (set-face-attribute 'fringe nil :background nil :foreground nil))
+    (set-face-attribute 'fringe nil :background nil :foreground nil)
+
+    (set-face-attribute 'font-lock-bracket-face nil
+                        :inherit nj/accent))
 
   (add-hook 'enable-theme-functions 'nj/theme-overrides)
 
