@@ -327,8 +327,8 @@ Disable line wrapping
                         :background 'unspecified)
 
     ;; (set-cursor-color (face-foreground nj/accent))
-    ;; (set-cursor-color "#737ea3")
-    (set-cursor-color "#eb6f92")
+    ;; (set-cursor-color "#eb6f92")
+    (set-cursor-color "Light Green")
 
     (set-face-attribute 'font-lock-variable-name-face nil
                         :foreground nil)
