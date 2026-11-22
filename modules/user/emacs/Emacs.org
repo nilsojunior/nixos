@@ -1372,7 +1372,8 @@ Compilations errors for pyright, taken from [[https://hadi.timachi.com/posts/pyt
   ;; (set-fringe-mode '(10 . 0))
 
   ;; NOTE: Distinguish RET from C-m. This does not work in the terminal
-  (define-key input-decode-map [?\C-m] [C-m])
+  (when (display-graphic-p)
+    (define-key input-decode-map [?\C-m] [C-m]))
 
   (defun nj-forward-WORD (n)
     (interactive "p")
