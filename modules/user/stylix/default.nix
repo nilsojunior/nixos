@@ -50,6 +50,8 @@ in
             enable = true;
             base16Scheme = theme;
             targets = {
+                # NOTE: This is broken
+                wayprompt.enable = false;
                 hyprland.enable = false;
                 hyprlock.enable = false;
                 vicinae.enable = false;

@@ -5,6 +5,10 @@
 }:
 let
     common = import ./common.nix;
+    monitors = {
+        main   = "DP-2";
+        second = "HDMI-A-1";
+    };
 in
 {
     imports = [
@@ -12,28 +16,34 @@ in
     ];
 
     userSettings = {
-        mainMonitor = "DP-2";
+        mainMonitor = monitors.main;
         hyprland = {
             enable = common.hyprland.enable;
             nvidia = true;
             config = {
-                "$main"   = "DP-2";
-                "$second" = "HDMI-A-1";
                 monitor = [
-                    "$main, 1920x1080@240, 0x1080, 1"
-                    "$second, 1920x1080@60, 0x0, 1"
+                    {
+                        output   = monitors.main;
+                        mode     = "1920x1080@240";
+                        position = "0x1080";
+                    }
+                    {
+                        output   = monitors.second;
+                        mode     = "1920x1080@60";
+                        position = "0x0";
+                    }
                 ];
-                workspace = [
-                    "1, monitor:$main"
-                    "2, monitor:$main"
-                    "3, monitor:$main"
-                    "4, monitor:$main"
-                    "5, monitor:$main"
-                    "6, monitor:$main"
-                    "7, monitor:$main"
-                    "8, monitor:$second"
-                    "9, monitor:$second"
-                    "10, monitor:$second"
+                workspace_rule = [
+                    { workspace = 1; monitor = monitors.main; }
+                    { workspace = 2; monitor = monitors.main; }
+                    { workspace = 3; monitor = monitors.main; }
+                    { workspace = 4; monitor = monitors.main; }
+                    { workspace = 5; monitor = monitors.main; }
+                    { workspace = 6; monitor = monitors.main; }
+                    { workspace = 7; monitor = monitors.main; }
+                    { workspace = 8; monitor = monitors.second; }
+                    { workspace = 9; monitor = monitors.second; }
+                    { workspace = 0; monitor = monitors.second; }
                 ];
             };
         };

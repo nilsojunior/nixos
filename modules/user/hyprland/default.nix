@@ -19,6 +19,94 @@ let
     shader_path    = ".config/hypr/shaders/vibrance.glsl";
     disable_shader = "hyprctl keyword decoration:screen_shader '';";
     enable_shader  = "hyprctl keyword decoration:screen_shader '~/${shader_path}'";
+
+    lua  = lib.generators.mkLuaInline;
+
+    bind = key: action: {
+        _args = [
+            key
+            (lua action)
+        ];
+    };
+
+    focus = ws:
+        "hl.dsp.focus({ workspace = '${toString ws}'})";
+
+    move = ws:
+        "hl.dsp.window.move({ workspace = '${toString ws}'})";
+
+    on = event: body: {
+        _args = [
+            event
+            (lua ''
+                function()
+                    ${lib.concatStringsSep "\n" body}
+                end
+            '')
+        ];
+    };
+
+    exec = cmd:
+        "hl.dsp.exec_cmd('${cmd}')";
+
+    exec-once = cmd: { workspace ? null }:
+        if workspace == null
+        then "hl.exec_cmd('${cmd}')"
+        else "hl.exec_cmd('${cmd}', { workspace = '${workspace}' })";
+
+    env = lib.mapAttrsToList (key: value: {
+        _args = [
+            key
+            value
+        ];
+    });
+
+    mod          = "SUPER";
+    rotate_value = 100;
+
+    dropNulls = lib.filterAttrs (_: v: v != null);
+
+    luaTable = attrs:
+        lib.generators.toLua { multiline = false; } (dropNulls attrs);
+
+    call = path: args:
+        let
+            filtered = dropNulls args;
+            body     = if filtered == {} then "" else luaTable filtered;
+        in
+        "hl.dsp.${path}(${body})";
+
+    hl = {
+        bind = key: action: flags: {
+            _args = [
+                key
+                (lua action)
+                flags
+            ];
+        };
+        dsp = {
+            focus = { direction }:
+                call "focus" { inherit direction; };
+            window = {
+                fullscreen = { action ? null, mode ? null }:
+                    call "window.fullscreen" { inherit action mode; };
+
+                float = { action ? null }:
+                    call "window.float" { inherit action; };
+
+                resize = { x ? null, y ? null, relative ? null}:
+                    call "window.resize" { inherit x y relative; };
+
+                close = { window ? null}:
+                    call "window.close" { inherit window; };
+
+                kill = { window ? null}:
+                    call "window.kill" { inherit window; };
+
+                drag = "hl.dsp.window.drag()";
+            };
+        };
+    };
 in
 {
     options = {
@@ -27,7 +115,7 @@ in
             nvidia = lib.mkEnableOption "Enables Nvidia for Hyprland";
             config = lib.mkOption {
                 type = lib.types.attrs;
-                default = { };
+                default = {};
                 description = "Adds configuration to Hyprland";
             };
         };
@@ -74,174 +162,148 @@ in
             '')
         ];
 
+        wayland.windowManager.hyprland.configType = "lua";
         wayland.windowManager.hyprland.settings = lib.mkMerge [
             {
-                cursor = {
-                    hide_on_key_press = true;
-                };
+                config = {
+                    cursor.hide_on_key_press = true;
 
-                "$mainMod" = "SUPER";
-                "$rotate_val" = 100;
+                    input = {
+                        force_no_accel = true;
+                        follow_mouse = 1;
+                        sensitivity = 0; # -1.0 - 1.0, 0 means no modification.
+                        kb_layout = "us,us";
+                        kb_variant = ",intl";
+                    };
 
-                exec-once = [
-                    "[workspace 1 silent] ${browser}"
-                    "[workspace 3 silent] ${ if editor != "emacs" then terminal else editor }"
-                ]
-                ++ lib.optional spotify.enable "[workspace 4 silent] spotify";
+                    general = {
+                        layout = "master";
+                    };
 
-                input = {
-                    force_no_accel = true;
-                    follow_mouse = 1;
-                    sensitivity = 0; # -1.0 - 1.0, 0 means no modification.
+                    dwindle = {
+                        # TODO: This is broken
+                        # pseudotile = true;
+                        preserve_split = true;
+                        force_split = 2; # Always split to the right
+                    };
 
-                    kb_layout = "us,us";
-                    kb_variant = ",intl";
+                    master = {
+                        new_status = "slave";
+                    };
+
+                    decoration = {
+                        screen_shader = "~/${shader_path}";
+                    };
+
+                    misc = {
+                        key_press_enables_dpms = true;
+                        force_default_wallpaper = -1; # Set to 0 or 1 to disable the anime mascot wallpapers
+                        disable_hyprland_logo = true; # If true disables the random hyprland logo / anime girl background. :(
+                    };
                 };
 
                 # From Hyprland docs
-                windowrule = [
+                window_rule = [
                     {
                         # Ignore maximize requests from all apps. You'll probably like this.
-                        name = "suppress-maximize-events";
-                        "match:class" = ".*";
+                        name           = "suppress-maximize-events";
+                        match.class    = ".*";
                         suppress_event = "maximize";
                     }
                     {
                         # Fix some dragging issues with XWayland
                         name = "fix-xwayland-drags";
-                        "match:class" = "^$";
-                        "match:title" = "^$";
-                        "match:xwayland" = true;
-                        "match:float" = true;
-                        "match:fullscreen" = false;
-                        "match:pin" = false;
+                        match = {
+                            class      = "^$";
+                            title      = "^$";
+                            xwayland   = true;
+                            float      = true;
+                            fullscreen = false;
+                            pin        = false;
+                        };
                         no_focus = true;
                     }
                     {
                         # Hyprland-run windowrule
-                        name = "move-hyprland-run";
-                        "match:class" = "hyprland-run";
-                        move = "20 monitor_h-120";
-                        float = "yes";
+                        name        = "move-hyprland-run";
+                        match.class = "hyprland-run";
+                        move        = "20 monitor_h-120";
+                        float       = true;
                     }
                 ];
 
-                general = {
-                    layout = "master";
-                };
-
-                dwindle = {
-                    # TODO: This is broken
-                    # pseudotile = true;
-                    preserve_split = true;
-                    force_split = 2; # Always split to the right
-                };
-
-                master = {
-                    new_status = "slave";
-                };
-
-                misc = {
-                    key_press_enables_dpms = true;
-                    force_default_wallpaper = -1; # Set to 0 or 1 to disable the anime mascot wallpapers
-                    disable_hyprland_logo = true; # If true disables the random hyprland logo / anime girl background. :(
-                };
-
-                bind = [
-                    "$mainMod, T, exec, ${terminal}"
-                    "$mainMod, B, exec, ${browser}"
-                    "$mainMod, Q, killactive"
-                    "$SUPER_SHIFT, Q, forcekillactive"
-                    "$SUPER_SHIFT, BACKSPACE, exit"
-                    "$mainMod, V, togglefloating"
-                    "$mainMod, F, fullscreen, 1" # Maximize
-                    "$SUPER_SHIFT, F, fullscreen"
-                    "$mainMod, H, movefocus, l"
-                    "$mainMod, J, movefocus, d"
-                    "$mainMod, K, movefocus, u"
-                    "$mainMod, L, movefocus, r"
-
-                    # Hyprpicker
-                    "$SUPER_SHIFT, X, exec, ${disable_shader} hyprpicker --autocopy --lowercase-hex; ${enable_shader}"
-
-                    # Screenshots
-                    "$mainMod, P, exec, hyprshot -m window"
-                    "$SUPER_SHIFT, P, exec, hyprshot -m region"
-                    "$SUPER_CTRL, P, exec, hyprshot -m output -m active"
-
-                    # Switch keyboard layouts
-                    "$mainMod, Tab, exec, hyprctl switchxkblayout current next"
-
-                    "$SUPER_SHIFT, H, resizeactive, -$rotate_val 0"
-                    "$SUPER_SHIFT, J, resizeactive, 0 $rotate_val"
-                    "$SUPER_SHIFT, K, resizeactive, 0 -$rotate_val"
-                    "$SUPER_SHIFT, L, resizeactive, $rotate_val 0"
-                    "$mainMod, 1, workspace, 1"
-                    "$mainMod, 2, workspace, 2"
-                    "$mainMod, 3, workspace, 3"
-                    "$mainMod, 4, workspace, 4"
-                    "$mainMod, 5, workspace, 5"
-                    "$mainMod, 6, workspace, 6"
-                    "$mainMod, 7, workspace, 7"
-                    "$mainMod, 8, workspace, 8"
-                    "$mainMod, 9, workspace, 9"
-                    "$mainMod, 0, workspace, 10"
-                    "$mainMod SHIFT, 1, movetoworkspace, 1"
-                    "$mainMod SHIFT, 2, movetoworkspace, 2"
-                    "$mainMod SHIFT, 3, movetoworkspace, 3"
-                    "$mainMod SHIFT, 4, movetoworkspace, 4"
-                    "$mainMod SHIFT, 5, movetoworkspace, 5"
-                    "$mainMod SHIFT, 6, movetoworkspace, 6"
-                    "$mainMod SHIFT, 7, movetoworkspace, 7"
-                    "$mainMod SHIFT, 8, movetoworkspace, 8"
-                    "$mainMod SHIFT, 9, movetoworkspace, 9"
-                    "$mainMod SHIFT, 0, movetoworkspace, 10"
-                ] ++ lib.optional vicinae.enable "$mainMod, SPACE, exec, vicinae toggle";
-
-                bindm = [
-                    "$mainMod, mouse:272, movewindow"
-                    "$mainMod, mouse:273, resizewindow"
+                on = [
+                    (on "hyprland.start" (
+                        [
+                            (exec-once browser { workspace = "1 silent"; })
+                            (exec-once (if editor != "emacs" then terminal else editor) { workspace = "3 silent"; })
+                        ]
+                        ++ lib.optional spotify.enable (exec-once "spotify" { workspace = "4 silent"; })
+                    ))
                 ];
 
-                decoration = {
-                    screen_shader = "~/${shader_path}";
-                };
+                bind = [
+                    (bind "${mod} + T" (exec terminal))
+                    (bind "${mod} + B" (exec browser))
+                    (bind "${mod} + Q" (hl.dsp.window.close {}))
+                    (bind "${mod} + SHIFT + Q" (hl.dsp.window.kill {}))
+                    (bind "${mod} + SHIFT + BACKSPACE" (exec "hyprshutdown"))
+                    (bind "${mod} + V" (hl.dsp.window.float { action = "toggle"; }))
+                    (bind "${mod} + F" (hl.dsp.window.fullscreen { action = "toggle"; mode = "maximized"; }))
+                    (bind "${mod} + SHIFT + F" (hl.dsp.window.fullscreen { action = "toggle"; mode = "fullscreen"; }))
+
+                    (bind "${mod} + H" (hl.dsp.focus { direction = "left"; }))
+                    (bind "${mod} + J" (hl.dsp.focus { direction = "down"; }))
+                    (bind "${mod} + K" (hl.dsp.focus { direction = "up"; }))
+                    (bind "${mod} + L" (hl.dsp.focus { direction = "right"; }))
+
+                    (bind "${mod} + SHIFT + H" (hl.dsp.window.resize { x = -rotate_value; y = 0; relative = true; }))
+                    (bind "${mod} + SHIFT + J" (hl.dsp.window.resize { x = 0; y = rotate_value; relative = true; }))
+                    (bind "${mod} + SHIFT + K" (hl.dsp.window.resize { x = 0; y = -rotate_value; relative = true; }))
+                    (bind "${mod} + SHIFT + L" (hl.dsp.window.resize { x = rotate_value; y = 0; relative = true; }))
+
+                    # TODO: Fix this
+                    # (bind "${mod} + SHIFT + X" (exec "${disable_shader} hyprpicker --autocopy --lowercase-hex; ${enable_shader}"))
+                    (bind "${mod} + S" (exec "hyprshot -m window"))
+                    (bind "${mod} + SHIFT + S" (exec "hyprshot -m region"))
+                    (bind "${mod} + CTRL + S" (exec "hyprshot -m output -m active"))
+                    (bind "${mod} + TAB" (exec "hyprctl switchxkblayout current next"))
+
+                    # NOTE: Left: 272, Right: 273, Middle: 274
+                    (bind "${mod} + mouse:272" hl.dsp.window.drag)
+                    (bind "${mod} + mouse:273" (hl.dsp.window.resize {}))
+                ]
+                ++ map(n: bind "${mod} + ${toString n}" (focus n)) (lib.range 0 9)
+                ++ map(n: bind "${mod} + SHIFT + ${toString n}" (move n)) (lib.range 0 9)
+                ++ lib.optional vicinae.enable (bind "${mod} + SPACE" (exec "vicinae toggle"));
             }
 
             # Add Nvidia config if necessary
             (lib.mkIf cfg.nvidia {
-                env = [
-                    "LIBVA_DRIVER_NAME, nvidia"
-                    "__GLX_VENDOR_LIBRARY_NAME, nvidia"
-                    "NVD_BACKEND, direct"
+                env = env {
+                    LIBVA_DRIVER_NAME            = "nvidia";
+                    __GLX_VENDOR_LIBRARY_NAME    = "nvidia";
+                    NVD_BACKEND                  = "direct";
                     # Electron
-                    "ELECTRON_OZONE_PLATFORM_HINT,auto"
-                    "NIXOS_OZONE_WL=1"
-                ];
-
-                cursor = {
-                    no_hardware_cursors = true;
+                    ELECTRON_OZONE_PLATFORM_HINT = "auto";
+                    NIXOS_OZONE_WL               = 1;
                 };
 
-                misc = {
-                    vrr = 1;
+                config = {
+                    cursor.no_hardware_cursors = true;
+                    misc.vrr = 1;
                 };
             })
 
             (lib.mkIf laptop {
-                bindel = [
-                    ", XF86AudioRaiseVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
-                    ", XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
-                ];
-                bindl = [
-                    ", XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
-                    ",XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
-
-                    ", pause, exec, playerctl play-pause"
-                ];
                 bind = [
-                    ",XF86MonBrightnessUp, exec, brightnessctl s 10%+"
-                    ",XF86MonBrightnessDown, exec, brightnessctl s 10%-"
+                    (hl.bind "XF86AudioRaiseVolume" (exec "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+") { locked = true; repeating = true; })
+                    (hl.bind "XF86AudioLowerVolume" (exec "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-") { locked = true; repeating = true; })
+                    (hl.bind "XF86AudioMute" (exec "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle") { locked = true; repeating = true; })
+                    (hl.bind "XF86AudioMicMute" (exec "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle") { locked = true; repeating = true; })
+                    (hl.bind "XF86MonBrightnessUp" (exec "brightnessctl s 10%+") { locked = true; repeating = true; })
+                    (hl.bind "XF86MonBrightnessDown" (exec "brightnessctl s 10%-") { locked = true; repeating = true; })
+                    (hl.bind "pause" (exec "playerctl play-pause") { locked = true; })
                 ];
             })
 
@@ -277,7 +339,7 @@ in
             };
         };
 
-        services.hyprpaper.enable = true;
+        services.hyprpaper.enable = false;
 
         home.file."${shader_path}".text = ''
 /*
