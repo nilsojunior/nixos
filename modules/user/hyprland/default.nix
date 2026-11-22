@@ -17,8 +17,8 @@ let
     themes = import ./themes.nix;
 
     shader_path    = ".config/hypr/shaders/vibrance.glsl";
-    disable_shader = "hyprctl keyword decoration:screen_shader '';";
-    enable_shader  = "hyprctl keyword decoration:screen_shader '~/${shader_path}'";
+    disable_shader = ''hyprctl eval \"hl.config({ decoration = { screen_shader = \'\' }})\";'';
+    enable_shader  = ''hyprctl eval \"hl.config({ decoration = { screen_shader = \'~/${shader_path}\' } })\";'';
 
     lua  = lib.generators.mkLuaInline;
 
@@ -30,10 +30,10 @@ let
     };
 
     focus = ws:
-        "hl.dsp.focus({ workspace = '${toString ws}'})";
+        ''hl.dsp.focus({ workspace = "${toString ws}"})'';
 
     move = ws:
-        "hl.dsp.window.move({ workspace = '${toString ws}'})";
+        ''hl.dsp.window.move({ workspace = "${toString ws}"})'';
 
     on = event: body: {
         _args = [
@@ -47,12 +47,12 @@ let
     };
 
     exec = cmd:
-        "hl.dsp.exec_cmd('${cmd}')";
+        ''hl.dsp.exec_cmd("${cmd}")'';
 
     exec-once = cmd: { workspace ? null }:
         if workspace == null
-        then "hl.exec_cmd('${cmd}')"
-        else "hl.exec_cmd('${cmd}', { workspace = '${workspace}' })";
+        then ''hl.exec_cmd("${cmd}")''
+        else ''hl.exec_cmd("${cmd}", { workspace = "${workspace}" })'';
 
     env = lib.mapAttrsToList (key: value: {
         _args = [
@@ -262,8 +262,7 @@ in
                     (bind "${mod} + SHIFT + K" (hl.dsp.window.resize { x = 0; y = -rotate_value; relative = true; }))
                     (bind "${mod} + SHIFT + L" (hl.dsp.window.resize { x = rotate_value; y = 0; relative = true; }))
 
-                    # TODO: Fix this
-                    # (bind "${mod} + SHIFT + X" (exec "${disable_shader} hyprpicker --autocopy --lowercase-hex; ${enable_shader}"))
+                    (bind "${mod} + SHIFT + X" (exec "${disable_shader} hyprpicker --autocopy --lowercase-hex; ${enable_shader}"))
                     (bind "${mod} + S" (exec "hyprshot -m window"))
                     (bind "${mod} + SHIFT + S" (exec "hyprshot -m region"))
                     (bind "${mod} + CTRL + S" (exec "hyprshot -m output -m active"))
