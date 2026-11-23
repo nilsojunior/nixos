@@ -258,7 +258,7 @@ in
                     (bind "${mod} + SHIFT + K" (hl.dsp.window.resize { x = 0; y = -rotate_value; relative = true; }))
                     (bind "${mod} + SHIFT + L" (hl.dsp.window.resize { x = rotate_value; y = 0; relative = true; }))
 
-                    (bind "${mod} + SHIFT + X" (exec "${disable_shader} hyprpicker --autocopy --lowercase-hex; ${enable_shader}"))
+                    (bind "${mod} + SHIFT + E" (exec "${disable_shader} hyprpicker --autocopy --lowercase-hex; ${enable_shader}"))
                     (bind "${mod} + S" (exec "hyprshot -m window"))
                     (bind "${mod} + SHIFT + S" (exec "hyprshot -m region"))
                     (bind "${mod} + CTRL + S" (exec "hyprshot -m output -m active"))
@@ -267,10 +267,20 @@ in
                     # NOTE: Left: 272, Right: 273, Middle: 274
                     (bind "${mod} + mouse:272" hl.dsp.window.drag)
                     (bind "${mod} + mouse:273" (hl.dsp.window.resize {}))
+
+                    (hl.bind "${mod} + Z" (exec "playerctl previous") { repeating = true; })
+                    (hl.bind "${mod} + X" (exec "playerctl next") { repeating = true; })
+                    (bind "${mod} + SHIFT + A" (exec "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
+                    (bind "${mod} + A" (exec "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"))
                 ]
                 ++ map(n: bind "${mod} + ${toString n}" (focus n)) (lib.range 0 9)
                 ++ map(n: bind "${mod} + SHIFT + ${toString n}" (move n)) (lib.range 0 9)
-                ++ lib.optional vicinae.enable (bind "${mod} + SPACE" (exec "vicinae toggle"));
+                ++ lib.optional vicinae.enable (bind "${mod} + SPACE" (exec "vicinae toggle"))
+                ++ lib.optionals spotify.enable [
+                    (bind "${mod} + C" (exec "playerctl play-pause --player spotify"))
+                    (hl.bind "${mod} + SHIFT + Z" (exec "playerctl volume 0.1- --player spotify") { repeating = true; })
+                    (hl.bind "${mod} + SHIFT + X" (exec "playerctl volume 0.1+ --player spotify") { repeating = true; })
+                ];
             }
 
             # Add Nvidia config if necessary
@@ -299,6 +309,8 @@ in
                     (hl.bind "XF86MonBrightnessUp" (exec "brightnessctl s 10%+") { locked = true; repeating = true; })
                     (hl.bind "XF86MonBrightnessDown" (exec "brightnessctl s 10%-") { locked = true; repeating = true; })
                     (hl.bind "pause" (exec "playerctl play-pause") { locked = true; })
+                    # NOTE: Lock screen when closing laptop
+                    (hl.bind "switch:Lid Switch" (exec "hyprlock") { locked = true; })
                 ];
             })
 
