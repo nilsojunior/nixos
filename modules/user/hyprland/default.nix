@@ -176,9 +176,7 @@ in
                         kb_variant = ",intl";
                     };
 
-                    general = {
-                        layout = "master";
-                    };
+                    general.layout = "master";
 
                     dwindle = {
                         # TODO: This is broken
@@ -189,11 +187,10 @@ in
 
                     master = {
                         new_status = "slave";
+                        mfact      = 0.50;
                     };
 
-                    decoration = {
-                        screen_shader = "~/${shader_path}";
-                    };
+                    decoration.screen_shader = "~/${shader_path}";
 
                     misc = {
                         key_press_enables_dpms = true;
@@ -247,7 +244,6 @@ in
                     (bind "${mod} + B" (exec browser))
                     (bind "${mod} + Q" (hl.dsp.window.close {}))
                     (bind "${mod} + SHIFT + Q" (hl.dsp.window.kill {}))
-                    (bind "${mod} + SHIFT + BACKSPACE" (exec "hyprshutdown"))
                     (bind "${mod} + V" (hl.dsp.window.float { action = "toggle"; }))
                     (bind "${mod} + F" (hl.dsp.window.fullscreen { action = "toggle"; mode = "maximized"; }))
                     (bind "${mod} + SHIFT + F" (hl.dsp.window.fullscreen { action = "toggle"; mode = "fullscreen"; }))
